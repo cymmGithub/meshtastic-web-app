@@ -1,0 +1,26 @@
+# Node 1 Configuration
+log:
+  level: "info"
+  format: "text"
+settings:
+  device:
+    longName: "EmergencyNode1"
+    shortName: "EM1"
+    region: "US"  # Change to your region if needed
+    role: "CLIENT"
+    isRouter: false
+    channelSettings:
+      modemConfig: "LongSlow"
+      psk: "AQ==" # Should match main node's PSK
+  position:
+    latitude: 50.0010  # Slightly offset from main node
+    longitude: 20.0015
+    altitude: 100
+  # MAC Address for the virtual device (required)
+  MACAddress: "00:11:22:33:44:02"
+servers:
+  http:
+    enabled: true
+    address: "0.0.0.0:4403"
+  gRPC:
+    enabled: false

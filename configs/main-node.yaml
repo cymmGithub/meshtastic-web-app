@@ -1,0 +1,26 @@
+# Main Node Configuration
+log:
+  level: "info"
+  format: "text"
+settings:
+  device:
+    longName: "MainCoordinator"
+    shortName: "MAIN"
+    region: "US"  # Change to your region if needed
+    role: "ROUTER"
+    isRouter: true
+    channelSettings:
+      modemConfig: "LongSlow"
+      psk: "AQ==" # Default PSK, should be changed in production
+  position:
+    latitude: 50.0000  # Set your simulation coordinates
+    longitude: 20.0000
+    altitude: 100
+  # MAC Address for the virtual device (required)
+  MACAddress: "00:11:22:33:44:01"
+servers:
+  http:
+    enabled: true
+    address: "0.0.0.0:4403"
+  gRPC:
+    enabled: false

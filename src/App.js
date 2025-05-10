@@ -1,21 +1,39 @@
 import React, { useState, useEffect } from 'react';
+import {
+  Box,
+  Container,
+  Flex,
+  Heading,
+  useColorModeValue,
+  Grid,
+  GridItem,
+  Divider
+} from '@chakra-ui/react';
 import { MeshDevice } from "@meshtastic/core";
 import { TransportHTTP } from "@meshtastic/transport-http";
 import { useLanguage } from './i18n/LanguageContext';
 import LanguageSelector from './components/ui/LanguageSelector';
+import ThemeToggle from './components/ui/ThemeToggle';
 import DeviceConnection from './components/ui/DeviceConnection';
 import MessageTemplates from './components/templates/MessageTemplates';
 import MessageInput from './components/ui/MessageInput';
 import MessageHistory from './components/ui/MessageHistory';
+import { MessageInbox } from './components/messages';
 import './styles.css';
+import { SkipLink } from './components/accessibility';
 
 function App() {
   const { t } = useLanguage();
   const [connectionStatus, setConnectionStatus] = useState(t('disconnected'));
-  const [deviceAddress, setDeviceAddress] = useState('10.10.0.57'); // Default IP
+  const [deviceAddress, setDeviceAddress] = useState('172.19.0.2:4403'); // Default IP
   const [meshtasticDevice, setMeshtasticDevice] = useState(null);
   const [messages, setMessages] = useState([]);
   const [currentMessage, setCurrentMessage] = useState('');
+
+  // Get theme-aware colors
+  const bgColor = useColorModeValue('white', 'gray.900');
+  const headerBgColor = useColorModeValue('blue.50', 'blue.900');
+  const borderColor = useColorModeValue('gray.200', 'gray.700');
 
   useEffect(() => {
     console.log('App component rendering...');
@@ -27,7 +45,7 @@ function App() {
       console.log('Attempting to initialize Meshtastic device...');
       const transport = await TransportHTTP.create(deviceAddress);
       const deviceInstance = new MeshDevice(transport);
-      
+
       setMeshtasticDevice(deviceInstance);
       setConnectionStatus(t('connected'));
       console.log('Meshtastic device initialized:', deviceInstance);
@@ -63,7 +81,7 @@ function App() {
       timestamp: new Date().toLocaleTimeString(),
       status: 'Sent' // This would normally be dynamic based on actual send status
     };
-    
+
     setMessages([newMessage, ...messages]);
     setCurrentMessage('');
   };
@@ -71,47 +89,121 @@ function App() {
   const handleSelectTemplate = (template) => {
     setCurrentMessage(template);
   };
-  
+
   return (
-    <div className="app-container">
-      <header className="app-header">
-        <h1 className="app-title">{t('appTitle')}</h1>
-        <LanguageSelector />
-      </header>
+    <Box position="relative">
+      {/* Add SkipLink for keyboard accessibility */}
+      <SkipLink targetId="main-content" />
 
-      <div className="main-content">
-        <div className="left-column">
-          <section className="section">
-            <h2 className="section-title">Device Connection</h2>
-            <DeviceConnection 
-              deviceAddress={deviceAddress}
-              onDeviceAddressChange={setDeviceAddress}
-              connectionStatus={connectionStatus}
-              onConnect={handleConnect}
-              onDisconnect={handleDisconnect}
-              isConnected={meshtasticDevice !== null}
-            />
-          </section>
+      <Box minH="100vh" p={4}>
+        <Container maxW="container.xl" p={0}>
+          <Flex
+            as="header"
+            align="center"
+            justify="space-between"
+            py={3}
+            px={5}
+            bg={headerBgColor}
+            borderBottomWidth="1px"
+            borderColor={borderColor}
+          >
+            <Heading size="lg" color="blue.500">{t('appTitle')}</Heading>
+            <Flex align="center" gap={2}>
+              <LanguageSelector />
+              <ThemeToggle />
+            </Flex>
+          </Flex>
 
-          <section className="section">
-            <h2 className="section-title">{t('messageTemplates')}</h2>
-            <MessageTemplates onSelectTemplate={handleSelectTemplate} />
-          </section>
-        </div>
+          <Box id="main-content" as="main" p={4} bg={bgColor} tabIndex={-1} outline="none">
+            <Grid
+              templateColumns={{ base: "1fr", md: "1fr 1fr" }}
+              gap={6}
+            >
+              <GridItem>
+                <Box
+                  mb={6}
+                  p={4}
+                  bg={useColorModeValue('white', 'gray.800')}
+                  borderRadius="md"
+                  boxShadow="sm"
+                  borderWidth="1px"
+                  borderColor={borderColor}
+                >
+                  <Heading as="h2" size="md" mb={4}>{t('connectionStatus')}</Heading>
+                  <DeviceConnection
+                    deviceAddress={deviceAddress}
+                    onDeviceAddressChange={setDeviceAddress}
+                    connectionStatus={connectionStatus}
+                    onConnect={handleConnect}
+                    onDisconnect={handleDisconnect}
+                    isConnected={meshtasticDevice !== null}
+                  />
+                </Box>
 
-        <div className="right-column">
-          <section className="section">
-            <h2 className="section-title">{t('messageInput')}</h2>
-            <MessageInput 
-              initialValue={currentMessage}
-              onSendMessage={handleSendMessage}
-            />
-          </section>
+                <Box
+                  p={4}
+                  bg={useColorModeValue('white', 'gray.800')}
+                  borderRadius="md"
+                  boxShadow="sm"
+                  borderWidth="1px"
+                  borderColor={borderColor}
+                >
+                  <Heading as="h2" size="md" mb={4}>{t('messageTemplates')}</Heading>
+                  <MessageTemplates onSelectTemplate={handleSelectTemplate} />
+                </Box>
+              </GridItem>
 
-          <MessageHistory messages={messages} />
-        </div>
-      </div>
-    </div>
+              <GridItem>
+                <Box
+                  mb={6}
+                  p={4}
+                  bg={useColorModeValue('white', 'gray.800')}
+                  borderRadius="md"
+                  boxShadow="sm"
+                  borderWidth="1px"
+                  borderColor={borderColor}
+                >
+                  <Heading as="h2" size="md" mb={4}>{t('messageInput')}</Heading>
+                  <MessageInput
+                    initialValue={currentMessage}
+                    onSendMessage={handleSendMessage}
+                  />
+                </Box>
+
+                <Box
+                  p={4}
+                  bg={useColorModeValue('white', 'gray.800')}
+                  borderRadius="md"
+                  boxShadow="sm"
+                  borderWidth="1px"
+                  borderColor={borderColor}
+                >
+                  <MessageHistory messages={messages} />
+                </Box>
+              </GridItem>
+            </Grid>
+
+            {/* New Section - Message Inbox */}
+            <Box mt={10}>
+              <Divider mb={8} />
+              <Heading as="h2" size="lg" mb={6}>
+                {t('messages')}
+              </Heading>
+              <Box
+                p={4}
+                bg={useColorModeValue('white', 'gray.800')}
+                borderRadius="md"
+                boxShadow="sm"
+                borderWidth="1px"
+                borderColor={borderColor}
+              >
+                <MessageInbox />
+              </Box>
+            </Box>
+          </Box>
+        </Container>
+      </Box>
+    </Box>
   );
 }
 

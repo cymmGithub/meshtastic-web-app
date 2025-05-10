@@ -1,15 +1,42 @@
 services:
   app:
     build:
-      context: . # Look for Dockerfile in the current directory
+      context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000" # Map port 3000 on host to port 3000 in container
+      - "3000:3000"
     volumes:
-      - ./src:/app/src # Mount the src directory for live reloading
-      - ./public:/app/public # Mount the public directory
+      - ./src:/app/src
+      - ./public:/app/public
     environment:
       - NODE_ENV=development
-      - CHOKIDAR_USEPOLLING=true # Helps with file watching in Docker on some systems
+      - CHOKIDAR_USEPOLLING=true
+      - MESHTASTIC_HTTP_HOST=meshtasticd
+      - MESHTASTIC_HTTP_PORT=4403
     stdin_open: true # Keeps stdin open, useful for Create React App
     tty: true        # Allocates a TTY, useful for Create React App
+    depends_on:
+      - meshtasticd
+    networks:
+      - mesh-network
+
+  meshtasticd:
+    image: meshtastic/meshtasticd:beta
+    container_name: meshtasticd
+    restart: unless-stopped
+    ports:
+      - "4403:4403"
+    volumes:
+      - mesh-data:/var/lib/meshtasticd
+    environment:
+      - MAC_ADDRESS=00:11:22:33:44:55
+    networks:
+      - mesh-network
+
+networks:
+  mesh-network:
+    driver: bridge
+
+volumes:
+  mesh-data:
+    driver: local

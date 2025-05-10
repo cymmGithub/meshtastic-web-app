@@ -1,4 +1,22 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { 
+  Box, 
+  FormControl, 
+  FormLabel, 
+  Input, 
+  Button, 
+  Flex, 
+  Text, 
+  VStack,
+  Badge,
+  useColorModeValue,
+  HStack,
+  Tooltip,
+  InputGroup,
+  InputLeftAddon,
+  Icon
+} from '@chakra-ui/react';
+import { FiWifi, FiWifiOff, FiAlertCircle } from 'react-icons/fi';
 import { useLanguage } from '../../i18n/LanguageContext';
 
 const DeviceConnection = ({ 
@@ -11,54 +29,109 @@ const DeviceConnection = ({
 }) => {
   const { t } = useLanguage();
   
+  // Status color mapping
+  const getStatusColor = () => {
+    switch(connectionStatus.toLowerCase()) {
+      case t('connected').toLowerCase():
+        return 'green';
+      case t('connecting').toLowerCase():
+        return 'orange';
+      case t('disconnected').toLowerCase():
+        return 'gray';
+      default:
+        return 'red'; // Error states
+    }
+  };
+
+  // Status icon mapping
+  const getStatusIcon = () => {
+    switch(connectionStatus.toLowerCase()) {
+      case t('connected').toLowerCase():
+        return FiWifi;
+      case t('connecting').toLowerCase():
+        return FiWifi;
+      case t('disconnected').toLowerCase():
+        return FiWifiOff;
+      default:
+        return FiAlertCircle; // Error states
+    }
+  };
+  
   return (
-    <div className="device-connection">
-      <div className="connection-form">
-        <div className="input-group">
-          <label htmlFor="deviceAddress">{t('deviceAddress')}: </label>
-          <input
-            type="text"
+    <VStack spacing={4} align="stretch" width="100%">
+      <FormControl>
+        <FormLabel htmlFor="deviceAddress" fontWeight="medium">
+          {t('deviceAddress')}
+        </FormLabel>
+        <InputGroup>
+          <InputLeftAddon>IP</InputLeftAddon>
+          <Input
             id="deviceAddress"
             value={deviceAddress}
             onChange={(e) => onDeviceAddressChange(e.target.value)}
             placeholder="e.g., 192.168.1.100"
-            className="device-address-input"
+            type="text"
+            pattern="\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"
+            aria-describedby="device-address-hint"
+            isInvalid={!deviceAddress}
           />
-        </div>
+        </InputGroup>
+      </FormControl>
+      
+      <Flex 
+        direction={{ base: 'column', sm: 'row' }} 
+        justify="space-between"
+        align={{ base: 'stretch', sm: 'center' }}
+        gap={3}
+      >
+        <HStack spacing={2}>
+          <Text fontWeight="medium">{t('connectionStatus')}:</Text>
+          <Badge 
+            colorScheme={getStatusColor()} 
+            px={2} 
+            py={1} 
+            borderRadius="md"
+            display="flex"
+            alignItems="center"
+            gap={1}
+          >
+            <Icon as={getStatusIcon()} />
+            <Text>{connectionStatus}</Text>
+          </Badge>
+        </HStack>
         
-        <div className="connection-actions">
-          {!isConnected ? (
-            <button 
-              onClick={onConnect} 
-              disabled={connectionStatus === t('connecting')}
-              className="connect-button"
-            >
-              {connectionStatus === t('connecting') ? t('connecting') : t('connectButton')}
-            </button>
-          ) : (
-            <button 
-              onClick={onDisconnect}
-              className="disconnect-button"
-            >
-              {t('disconnectButton')}
-            </button>
-          )}
-        </div>
-      </div>
+        {!isConnected ? (
+          <Button 
+            onClick={onConnect} 
+            isLoading={connectionStatus === t('connecting')}
+            loadingText={t('connecting')}
+            colorScheme="blue"
+            leftIcon={<Icon as={FiWifi} />}
+            isDisabled={!deviceAddress}
+            width={{ base: '100%', sm: 'auto' }}
+          >
+            {t('connectButton')}
+          </Button>
+        ) : (
+          <Button 
+            onClick={onDisconnect}
+            colorScheme="red"
+            leftIcon={<Icon as={FiWifiOff} />}
+            width={{ base: '100%', sm: 'auto' }}
+          >
+            {t('disconnectButton')}
+          </Button>
+        )}
+      </Flex>
       
-      <div className="connection-status">
-        <span className="status-label">{t('connectionStatus')}: </span>
-        <span className={`status-value status-${connectionStatus.toLowerCase().replace(/\s+/g, '-')}`}>
-          {connectionStatus}
-        </span>
-      </div>
-      
-      <p className="connection-hint">
-        <small>
-          {t('ensureDeviceReachable')}
-        </small>
-      </p>
-    </div>
+      <Text 
+        fontSize="sm" 
+        color={useColorModeValue("gray.600", "gray.400")}
+        id="device-address-hint"
+      >
+        {t('ensureDeviceReachable')}
+      </Text>
+    </VStack>
   );
 };
 

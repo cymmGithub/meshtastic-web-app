@@ -1,0 +1,26 @@
+# Meshtastic Daemon Configuration
+log:
+  level: "info"
+  format: "text"
+settings:
+  device:
+    # Configuration for the virtual device
+    # You can adjust these settings based on your needs
+    longName: "MeshWebApp"
+    shortName: "MWA"
+    region: "US"
+    role: "CLIENT"
+    isRouter: true
+    channelSettings:
+      modemConfig: "LongSlow"
+      psk: "AQ==" # Base64 encoded PSK (this is a default, you should change it)
+  # MAC Address must be at the root level
+MACAddress: "00:11:22:33:44:55"
+servers:
+  http:
+    enabled: true
+    address: "0.0.0.0:4403"
+    # Additional HTTP server configuration if needed
+  gRPC:
+    enabled: false
+    # gRPC configuration if needed
