@@ -1,72 +1,80 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  FormControl,
-  Textarea,
-  Button,
-  VStack,
-  Box,
-  HStack,
+  Box, 
+  FormControl, 
+  Textarea, 
+  Button, 
+  HStack, 
   useColorModeValue,
-  Icon
 } from '@chakra-ui/react';
-import { FiSend } from 'react-icons/fi';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { SpeechRecognition } from '../accessibility';
 
 const MessageInput = ({ initialValue = '', onSendMessage }) => {
   const { t } = useLanguage();
   const [message, setMessage] = useState(initialValue);
-  const textareaRef = useRef(null);
-
-  // Update message when initialValue changes (from template selection)
+  
+  // Update message when initialValue changes (e.g. when a template is selected)
   useEffect(() => {
     setMessage(initialValue);
-    // Focus the textarea when a template is selected
-    if (initialValue && initialValue !== message && textareaRef.current) {
-      textareaRef.current.focus();
-    }
   }, [initialValue]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  
+  const handleSend = () => {
     if (message.trim()) {
       onSendMessage(message);
       setMessage('');
     }
   };
+  
+  const handleKeyDown = (e) => {
+    // Ctrl/Cmd + Enter to send message
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      handleSend();
+    }
+  };
 
+  // Handle speech recognition transcript
+  const handleVoiceInput = (transcript) => {
+    setMessage(prev => {
+      // If there's existing text, add a space before the transcription
+      const space = prev.trim() ? ' ' : '';
+      return prev + space + transcript;
+    });
+  };
+  
   return (
-    <Box as="form" onSubmit={handleSubmit} width="100%">
-      <VStack spacing={3} align="stretch">
-        <FormControl>
-          <Textarea
-            ref={textareaRef}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder={t('messageInput')}
-            size="md"
-            rows={4}
-            resize="vertical"
-            bg={useColorModeValue('white', 'gray.700')}
-            _focus={{
-              borderColor: 'blue.400',
-              boxShadow: '0 0 0 1px var(--chakra-colors-blue-400)',
-            }}
-            aria-label={t('messageInput')}
-          />
-        </FormControl>
+    <Box>
+      <FormControl>
+        <Textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={t('messageInput')}
+          size="md"
+          rows={5}
+          mb={4}
+          bg={useColorModeValue('white', 'gray.700')}
+          resize="vertical"
+          aria-label={t('messageInput')}
+        />
+      </FormControl>
+      
+      <HStack spacing={4} justify="space-between">
+        <SpeechRecognition 
+          onTranscript={handleVoiceInput} 
+          placeholder={t('speakNow')}
+        />
         
-        <Box textAlign={{ base: 'stretch', sm: 'right' }}>
-          <Button 
-            type="submit" 
-            colorScheme="blue" 
-            rightIcon={<Icon as={FiSend} />}
-            isDisabled={!message.trim()}
-            width={{ base: '100%', sm: 'auto' }}
-          >
-            {t('sendButton')}
-          </Button>
-        </Box>
-      </VStack>
+        <Button 
+          colorScheme="blue" 
+          onClick={handleSend}
+          isDisabled={!message.trim()}
+          aria-label={t('sendButton')}
+        >
+          {t('sendButton')}
+        </Button>
+      </HStack>
     </Box>
   );
 };

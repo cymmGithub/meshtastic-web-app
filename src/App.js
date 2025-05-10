@@ -20,6 +20,7 @@ import MessageInput from './components/ui/MessageInput';
 import MessageHistory from './components/ui/MessageHistory';
 import { MessageInbox } from './components/messages';
 import './styles.css';
+import { SkipLink } from './components/accessibility';
 
 function App() {
   const { t } = useLanguage();
@@ -90,112 +91,119 @@ function App() {
   };
   
   return (
-    <Container maxW="container.xl" p={0}>
-      <Flex 
-        as="header" 
-        align="center" 
-        justify="space-between" 
-        py={3} 
-        px={5} 
-        bg={headerBgColor} 
-        borderBottomWidth="1px" 
-        borderColor={borderColor}
-      >
-        <Heading size="lg" color="blue.500">{t('appTitle')}</Heading>
-        <Flex align="center" gap={2}>
-          <LanguageSelector />
-          <ThemeToggle />
-        </Flex>
-      </Flex>
-
-      <Box as="main" p={4} bg={bgColor}>
-        <Grid 
-          templateColumns={{ base: "1fr", md: "1fr 1fr" }} 
-          gap={6}
-        >
-          <GridItem>
-            <Box 
-              mb={6} 
-              p={4} 
-              bg={useColorModeValue('white', 'gray.800')} 
-              borderRadius="md" 
-              boxShadow="sm" 
-              borderWidth="1px"
-              borderColor={borderColor}
-            >
-              <Heading as="h2" size="md" mb={4}>{t('connectionStatus')}</Heading>
-              <DeviceConnection 
-                deviceAddress={deviceAddress}
-                onDeviceAddressChange={setDeviceAddress}
-                connectionStatus={connectionStatus}
-                onConnect={handleConnect}
-                onDisconnect={handleDisconnect}
-                isConnected={meshtasticDevice !== null}
-              />
-            </Box>
-
-            <Box 
-              p={4} 
-              bg={useColorModeValue('white', 'gray.800')} 
-              borderRadius="md" 
-              boxShadow="sm" 
-              borderWidth="1px"
-              borderColor={borderColor}
-            >
-              <Heading as="h2" size="md" mb={4}>{t('messageTemplates')}</Heading>
-              <MessageTemplates onSelectTemplate={handleSelectTemplate} />
-            </Box>
-          </GridItem>
-
-          <GridItem>
-            <Box 
-              mb={6} 
-              p={4} 
-              bg={useColorModeValue('white', 'gray.800')} 
-              borderRadius="md" 
-              boxShadow="sm" 
-              borderWidth="1px"
-              borderColor={borderColor}
-            >
-              <Heading as="h2" size="md" mb={4}>{t('messageInput')}</Heading>
-              <MessageInput 
-                initialValue={currentMessage}
-                onSendMessage={handleSendMessage}
-              />
-            </Box>
-
-            <Box 
-              p={4} 
-              bg={useColorModeValue('white', 'gray.800')} 
-              borderRadius="md" 
-              boxShadow="sm" 
-              borderWidth="1px"
-              borderColor={borderColor}
-            >
-              <MessageHistory messages={messages} />
-            </Box>
-          </GridItem>
-        </Grid>
-        
-        {/* New Section - Message Inbox */}
-        <Box mt={10}>
-          <Divider mb={8} />
-          <Heading as="h2" size="lg" mb={6}>
-            {t('messages')}
-          </Heading>
-          <Box 
-            p={4} 
-            bg={useColorModeValue('white', 'gray.800')} 
-            borderRadius="md" 
-            boxShadow="sm" 
-            borderWidth="1px"
+    <Box position="relative">
+      {/* Add SkipLink for keyboard accessibility */}
+      <SkipLink targetId="main-content" />
+      
+      <Box minH="100vh" p={4}>
+        <Container maxW="container.xl" p={0}>
+          <Flex 
+            as="header" 
+            align="center" 
+            justify="space-between" 
+            py={3} 
+            px={5} 
+            bg={headerBgColor} 
+            borderBottomWidth="1px" 
             borderColor={borderColor}
           >
-            <MessageInbox />
+            <Heading size="lg" color="blue.500">{t('appTitle')}</Heading>
+            <Flex align="center" gap={2}>
+              <LanguageSelector />
+              <ThemeToggle />
+            </Flex>
+          </Flex>
+
+          <Box id="main-content" as="main" p={4} bg={bgColor} tabIndex={-1} outline="none">
+            <Grid 
+              templateColumns={{ base: "1fr", md: "1fr 1fr" }} 
+              gap={6}
+            >
+              <GridItem>
+                <Box 
+                  mb={6} 
+                  p={4} 
+                  bg={useColorModeValue('white', 'gray.800')} 
+                  borderRadius="md" 
+                  boxShadow="sm" 
+                  borderWidth="1px"
+                  borderColor={borderColor}
+                >
+                  <Heading as="h2" size="md" mb={4}>{t('connectionStatus')}</Heading>
+                  <DeviceConnection 
+                    deviceAddress={deviceAddress}
+                    onDeviceAddressChange={setDeviceAddress}
+                    connectionStatus={connectionStatus}
+                    onConnect={handleConnect}
+                    onDisconnect={handleDisconnect}
+                    isConnected={meshtasticDevice !== null}
+                  />
+                </Box>
+
+                <Box 
+                  p={4} 
+                  bg={useColorModeValue('white', 'gray.800')} 
+                  borderRadius="md" 
+                  boxShadow="sm" 
+                  borderWidth="1px"
+                  borderColor={borderColor}
+                >
+                  <Heading as="h2" size="md" mb={4}>{t('messageTemplates')}</Heading>
+                  <MessageTemplates onSelectTemplate={handleSelectTemplate} />
+                </Box>
+              </GridItem>
+
+              <GridItem>
+                <Box 
+                  mb={6} 
+                  p={4} 
+                  bg={useColorModeValue('white', 'gray.800')} 
+                  borderRadius="md" 
+                  boxShadow="sm" 
+                  borderWidth="1px"
+                  borderColor={borderColor}
+                >
+                  <Heading as="h2" size="md" mb={4}>{t('messageInput')}</Heading>
+                  <MessageInput 
+                    initialValue={currentMessage}
+                    onSendMessage={handleSendMessage}
+                  />
+                </Box>
+
+                <Box 
+                  p={4} 
+                  bg={useColorModeValue('white', 'gray.800')} 
+                  borderRadius="md" 
+                  boxShadow="sm" 
+                  borderWidth="1px"
+                  borderColor={borderColor}
+                >
+                  <MessageHistory messages={messages} />
+                </Box>
+              </GridItem>
+            </Grid>
+            
+            {/* New Section - Message Inbox */}
+            <Box mt={10}>
+              <Divider mb={8} />
+              <Heading as="h2" size="lg" mb={6}>
+                {t('messages')}
+              </Heading>
+              <Box 
+                p={4} 
+                bg={useColorModeValue('white', 'gray.800')} 
+                borderRadius="md" 
+                boxShadow="sm" 
+                borderWidth="1px"
+                borderColor={borderColor}
+              >
+                <MessageInbox />
+              </Box>
+            </Box>
           </Box>
-        </Box>
+        </Container>
       </Box>
-    </Container>
+    </Box>
   );
 }
 

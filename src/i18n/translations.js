@@ -49,7 +49,17 @@ export const translations = {
     allCitizens: 'All citizens',
     from: 'From',
     acknowledge: 'Acknowledge',
-    acknowledgeTooltip: 'Click to confirm you have read and understood this message'
+    acknowledgeTooltip: 'Click to confirm you have read and understood this message',
+    readAloud: 'Read message aloud',
+    speakNow: 'Speak now',
+    listening: 'Listening...',
+    startListening: 'Start voice input',
+    stopListening: 'Stop voice input',
+    speechNotSupported: 'Text-to-speech not supported',
+    speechRecognitionError: 'Voice recognition error',
+    skipToContent: 'Skip to main content',
+    expandMessage: 'Expand message',
+    collapseMessage: 'Collapse message'
   },
   pl: {
     appTitle: 'Awaryjna Komunikacja Mesh',
@@ -101,7 +111,17 @@ export const translations = {
     allCitizens: 'Wszyscy obywatele',
     from: 'Od',
     acknowledge: 'Potwierdź',
-    acknowledgeTooltip: 'Kliknij, aby potwierdzić, że przeczytałeś i zrozumiałeś tę wiadomość'
+    acknowledgeTooltip: 'Kliknij, aby potwierdzić, że przeczytałeś i zrozumiałeś tę wiadomość',
+    readAloud: 'Odczytaj wiadomość',
+    speakNow: 'Mów teraz',
+    listening: 'Słucham...',
+    startListening: 'Rozpocznij wprowadzanie głosowe',
+    stopListening: 'Zatrzymaj wprowadzanie głosowe',
+    speechNotSupported: 'Synteza mowy nie jest obsługiwana',
+    speechRecognitionError: 'Błąd rozpoznawania mowy',
+    skipToContent: 'Przejdź do głównej treści',
+    expandMessage: 'Rozwiń wiadomość',
+    collapseMessage: 'Zwiń wiadomość'
   },
   ua: {
     appTitle: 'Екстрена комунікація Mesh',
@@ -153,7 +173,17 @@ export const translations = {
     allCitizens: 'Всіх громадян',
     from: 'Від',
     acknowledge: 'Підтвердити',
-    acknowledgeTooltip: 'Натисніть, щоб підтвердити, що ви прочитали та зрозуміли це повідомлення'
+    acknowledgeTooltip: 'Натисніть, щоб підтвердити, що ви прочитали та зрозуміли це повідомлення',
+    readAloud: 'Прочитати повідомлення',
+    speakNow: 'Говоріть зараз',
+    listening: 'Слухаю...',
+    startListening: 'Почати голосове введення',
+    stopListening: 'Зупинити голосове введення',
+    speechNotSupported: 'Синтез мовлення не підтримується',
+    speechRecognitionError: 'Помилка розпізнавання голосу',
+    skipToContent: 'Перейти до головного вмісту',
+    expandMessage: 'Розгорнути повідомлення',
+    collapseMessage: 'Згорнути повідомлення'
   },
   ru: {
     appTitle: 'Аварийная связь Mesh',
@@ -205,6 +235,16 @@ export const translations = {
     allCitizens: 'Всех граждан',
     from: 'От',
     acknowledge: 'Подтвердить',
-    acknowledgeTooltip: 'Нажмите, чтобы подтвердить, что вы прочитали и поняли это сообщение'
+    acknowledgeTooltip: 'Нажмите, чтобы подтвердить, что вы прочитали и поняли это сообщение',
+    readAloud: 'Прочитать сообщение',
+    speakNow: 'Говорите сейчас',
+    listening: 'Слушаю...',
+    startListening: 'Начать голосовой ввод',
+    stopListening: 'Остановить голосовой ввод',
+    speechNotSupported: 'Синтез речи не поддерживается',
+    speechRecognitionError: 'Ошибка распознавания голоса',
+    skipToContent: 'Перейти к основному содержанию',
+    expandMessage: 'Развернуть сообщение',
+    collapseMessage: 'Свернуть сообщение'
   }
 } 

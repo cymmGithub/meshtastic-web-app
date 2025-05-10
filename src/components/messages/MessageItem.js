@@ -32,6 +32,7 @@ import {
 import { useLanguage } from '../../i18n/LanguageContext';
 import { formatDistanceToNow, format } from 'date-fns';
 import { getPriorityColor } from '../../utils/mockMessages';
+import TextToSpeech from '../accessibility/TextToSpeech';
 
 // Helper to get the appropriate icon for a category
 const getCategoryIcon = (category) => {
@@ -172,8 +173,11 @@ const MessageItem = ({ message, onAcknowledge }) => {
           borderTop="1px solid"
           borderTopColor={borderColor}
         >
-          {/* Message content */}
-          <Text mb={4}>{message.content[language]}</Text>
+          {/* Message content with text-to-speech button */}
+          <Flex align="center" justify="space-between">
+            <Text mb={4} flex="1">{message.content[language]}</Text>
+            <TextToSpeech text={message.content[language]} />
+          </Flex>
           
           {/* Meta information */}
           <Flex 
