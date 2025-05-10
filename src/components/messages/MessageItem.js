@@ -198,19 +198,21 @@ const MessageItem = ({ message, onAcknowledge }) => {
             
             {/* Acknowledgment button */}
             {message.requiresAcknowledgment && !message.acknowledged && (
-              <Button 
-                size="sm" 
-                leftIcon={<Icon as={FiCheckCircle} />}
-                colorScheme={isCritical ? "red" : "blue"}
-                variant={isCritical ? "solid" : "outline"}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (onAcknowledge) onAcknowledge(message.id);
-                }}
-                aria-label={t('acknowledge')}
-              >
-                {t('acknowledge')}
-              </Button>
+              <Tooltip label={t('acknowledgeTooltip')} placement="top" hasArrow>
+                <Button 
+                  size="sm" 
+                  leftIcon={<Icon as={FiCheckCircle} />}
+                  colorScheme={isCritical ? "red" : "blue"}
+                  variant={isCritical ? "solid" : "outline"}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onAcknowledge) onAcknowledge(message.id);
+                  }}
+                  aria-label={t('acknowledge')}
+                >
+                  {t('acknowledge')}
+                </Button>
+              </Tooltip>
             )}
             
             {/* Already acknowledged indicator */}
