@@ -1,4 +1,16 @@
 import React, { useState } from 'react';
+import { 
+  Box, 
+  Select, 
+  VStack, 
+  FormControl, 
+  FormLabel, 
+  Button, 
+  Text, 
+  useColorModeValue,
+  Icon
+} from '@chakra-ui/react';
+import { FiMessageSquare, FiChevronRight } from 'react-icons/fi';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { getCategoryTemplates, categories } from '../../utils/templateData';
 
@@ -6,46 +18,88 @@ const MessageTemplates = ({ onSelectTemplate }) => {
   const { language, t } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState('');
   const templates = selectedCategory ? getCategoryTemplates(selectedCategory, language) : [];
+  
+  // Get background colors based on color mode
+  const boxBgColor = useColorModeValue('gray.50', 'gray.700');
+
+  // Category color mapping for visual differentiation (for accessibility and memorability)
+  const getCategoryColor = (category) => {
+    switch(category) {
+      case 'urgentHelp':
+        return 'red';
+      case 'medicalEmergency':
+        return 'orange';
+      case 'evacuation':
+        return 'purple';
+      case 'resources':
+        return 'green';
+      case 'infrastructure':
+        return 'blue';
+      default:
+        return 'gray';
+    }
+  };
 
   return (
-    <div className="message-templates">
-      <h3>{t('messageTemplates')}</h3>
-      
-      <div className="category-selector">
-        <label htmlFor="category-select">{t('selectCategory')}: </label>
-        <select
+    <VStack spacing={4} align="stretch">
+      <FormControl>
+        <FormLabel htmlFor="category-select">
+          {t('selectCategory')}
+        </FormLabel>
+        <Select
           id="category-select"
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className="category-select"
+          placeholder={t('selectCategory')}
+          bg={useColorModeValue('white', 'gray.700')}
+          colorScheme={getCategoryColor(selectedCategory)}
         >
-          <option value="">{t('selectCategory')}</option>
           {categories.map((category) => (
             <option key={category} value={category}>
               {t(category)}
             </option>
           ))}
-        </select>
-      </div>
+        </Select>
+      </FormControl>
 
       {selectedCategory && (
-        <div className="templates-list">
+        <Box mt={4}>
           {templates.length > 0 ? (
-            templates.map((template, index) => (
-              <div
-                key={index}
-                className="template-item"
-                onClick={() => onSelectTemplate(template)}
-              >
-                {template}
-              </div>
-            ))
+            <VStack spacing={2} align="stretch">
+              {templates.map((template, index) => (
+                <Button
+                  key={index}
+                  onClick={() => onSelectTemplate(template)}
+                  variant="outline"
+                  colorScheme={getCategoryColor(selectedCategory)}
+                  justifyContent="flex-start"
+                  leftIcon={<Icon as={FiMessageSquare} />}
+                  rightIcon={<Icon as={FiChevronRight} />}
+                  py={3}
+                  px={4}
+                  height="auto"
+                  textAlign="left"
+                  whiteSpace="normal"
+                  role="button"
+                  aria-label={`Use template: ${template}`}
+                >
+                  <Text>{template}</Text>
+                </Button>
+              ))}
+            </VStack>
           ) : (
-            <div className="no-templates">{t('noTemplatesFound')}</div>
+            <Box 
+              p={4} 
+              bg={boxBgColor} 
+              borderRadius="md"
+              textAlign="center"
+            >
+              <Text>{t('noTemplatesFound')}</Text>
+            </Box>
           )}
-        </div>
+        </Box>
       )}
-    </div>
+    </VStack>
   );
 };
 

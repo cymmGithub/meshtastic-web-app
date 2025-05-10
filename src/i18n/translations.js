@@ -26,7 +26,12 @@ export const translations = {
     custom: 'Custom message',
     send: 'Send',
     cancel: 'Cancel',
-    messageHistory: 'Message History'
+    messageHistory: 'Message History',
+    changeColorMode: 'Change color mode',
+    lightMode: 'Light mode',
+    darkMode: 'Dark mode',
+    systemMode: 'System preference',
+    accessibility: 'Accessibility'
   },
   pl: {
     appTitle: 'Awaryjna Komunikacja Mesh',
@@ -55,7 +60,12 @@ export const translations = {
     custom: 'Własna wiadomość',
     send: 'Wyślij',
     cancel: 'Anuluj',
-    messageHistory: 'Historia wiadomości'
+    messageHistory: 'Historia wiadomości',
+    changeColorMode: 'Zmień tryb kolorów',
+    lightMode: 'Tryb jasny',
+    darkMode: 'Tryb ciemny',
+    systemMode: 'Ustawienia systemowe',
+    accessibility: 'Dostępność'
   },
   ua: {
     appTitle: 'Екстрена комунікація Mesh',
@@ -84,7 +94,12 @@ export const translations = {
     custom: 'Власне повідомлення',
     send: 'Надіслати',
     cancel: 'Скасувати',
-    messageHistory: 'Історія повідомлень'
+    messageHistory: 'Історія повідомлень',
+    changeColorMode: 'Змінити режим кольорів',
+    lightMode: 'Світлий режим',
+    darkMode: 'Темний режим',
+    systemMode: 'Системний режим',
+    accessibility: 'Доступність'
   },
   ru: {
     appTitle: 'Аварийная связь Mesh',
@@ -113,6 +128,11 @@ export const translations = {
     custom: 'Собственное сообщение',
     send: 'Отправить',
     cancel: 'Отменить',
-    messageHistory: 'История сообщений'
+    messageHistory: 'История сообщений',
+    changeColorMode: 'Изменить режим цветов',
+    lightMode: 'Светлый режим',
+    darkMode: 'Темный режим',
+    systemMode: 'Системные настройки',
+    accessibility: 'Доступность'
   }
 } 
