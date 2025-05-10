@@ -1,18 +1,15 @@
-version: '3.8'
-
 services:
-  web:
+  app:
     build:
-      context: .
+      context: . # Look for Dockerfile in the current directory
       dockerfile: Dockerfile
-      target: deps  # For development, stop at deps stage
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/.next
     ports:
-      - "3000:3000"
+      - "3000:3000" # Map port 3000 on host to port 3000 in container
+    volumes:
+      - ./src:/app/src # Mount the src directory for live reloading
+      - ./public:/app/public # Mount the public directory
     environment:
       - NODE_ENV=development
-    command: npm run dev
-    restart: unless-stopped
+      - CHOKIDAR_USEPOLLING=true # Helps with file watching in Docker on some systems
+    stdin_open: true # Keeps stdin open, useful for Create React App
+    tty: true        # Allocates a TTY, useful for Create React App

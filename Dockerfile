@@ -1,54 +1,19 @@
-# Use Node.js as base image
-FROM node:20-alpine AS base
+# Use an official Node.js runtime as a parent image
+FROM node:20-alpine
 
-# Set working directory
+# Set the working directory in the container
 WORKDIR /app
 
-# Install dependencies only when needed
-FROM base AS deps
-COPY package.json package-lock.json* ./
+# Copy package.json and package-lock.json (if available)
+COPY package*.json ./
 
-# Install JSR CLI globally
-# RUN npm install -g @jsr/cli
-
-# Install dependencies including JSR packages
+# Install project dependencies
 RUN npm install
-RUN npx jsr add @meshtastic/core
-RUN npx jsr add @meshtastic/protobufs
-RUN npx jsr add @meshtastic/transport-http
-RUN npx jsr add @meshtastic/transport-web-bluetooth
-RUN npx jsr add @meshtastic/transport-web-serial
-
-# Rebuild the source code only when needed
-FROM base AS builder
-COPY --from=deps /app/node_modules ./node_modules
+# Copy the rest of the application code into the container
 COPY . .
 
-# Next.js collects anonymous telemetry data - disable it
-ENV NEXT_TELEMETRY_DISABLED 1
-
-# Build Next.js application
-RUN npm run build
-
-# Production image, copy all the files and run next
-FROM base AS runner
-WORKDIR /app
-
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
-
-# Create a non-root user and switch to it
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-USER nextjs
-
-# Copy necessary files from builder stage
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-
-# Expose port
+# Make port 3000 available to the world outside this container
 EXPOSE 3000
 
-# Start the application
-CMD ["node", "server.js"]
+# Command to run the app
+CMD ["npm", "start"]
