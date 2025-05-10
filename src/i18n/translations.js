@@ -31,7 +31,8 @@ export const translations = {
     lightMode: 'Light mode',
     darkMode: 'Dark mode',
     systemMode: 'System preference',
-    accessibility: 'Accessibility'
+    accessibility: 'Accessibility',
+    messages: 'Received Messages'
   },
   pl: {
     appTitle: 'Awaryjna Komunikacja Mesh',
@@ -65,7 +66,15 @@ export const translations = {
     lightMode: 'Tryb jasny',
     darkMode: 'Tryb ciemny',
     systemMode: 'Ustawienia systemowe',
-    accessibility: 'Dostępność'
+    accessibility: 'Dostępność',
+    messages: 'Odebrane Wiadomości',
+    messagesInbox: 'Odebrane Wiadomości',
+    allMessages: 'Wszystkie wiadomości',
+    filterByCategory: 'Filtruj według kategorii',
+    filterByPriority: 'Filtruj według priorytetu',
+    requiresYourAttention: 'Wymaga Twojej uwagi',
+    critical: 'KRYTYCZNY',
+    requiredAction: 'WYMAGANA AKCJA'
   },
   ua: {
     appTitle: 'Екстрена комунікація Mesh',
@@ -99,7 +108,8 @@ export const translations = {
     lightMode: 'Світлий режим',
     darkMode: 'Темний режим',
     systemMode: 'Системний режим',
-    accessibility: 'Доступність'
+    accessibility: 'Доступність',
+    messages: 'Отримані Повідомлення'
   },
   ru: {
     appTitle: 'Аварийная связь Mesh',
@@ -133,6 +143,7 @@ export const translations = {
     lightMode: 'Светлый режим',
     darkMode: 'Темный режим',
     systemMode: 'Системные настройки',
-    accessibility: 'Доступность'
+    accessibility: 'Доступность',
+    messages: 'Полученные Сообщения'
   }
 } 

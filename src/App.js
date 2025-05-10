@@ -7,6 +7,7 @@ import {
   useColorModeValue,
   Grid,
   GridItem,
+  Divider
 } from '@chakra-ui/react';
 import { MeshDevice } from "@meshtastic/core";
 import { TransportHTTP } from "@meshtastic/transport-http";
@@ -17,6 +18,7 @@ import DeviceConnection from './components/ui/DeviceConnection';
 import MessageTemplates from './components/templates/MessageTemplates';
 import MessageInput from './components/ui/MessageInput';
 import MessageHistory from './components/ui/MessageHistory';
+import { MessageInbox } from './components/messages';
 import './styles.css';
 
 function App() {
@@ -174,6 +176,24 @@ function App() {
             </Box>
           </GridItem>
         </Grid>
+        
+        {/* New Section - Message Inbox */}
+        <Box mt={10}>
+          <Divider mb={8} />
+          <Heading as="h2" size="lg" mb={6}>
+            {t('messages')}
+          </Heading>
+          <Box 
+            p={4} 
+            bg={useColorModeValue('white', 'gray.800')} 
+            borderRadius="md" 
+            boxShadow="sm" 
+            borderWidth="1px"
+            borderColor={borderColor}
+          >
+            <MessageInbox />
+          </Box>
+        </Box>
       </Box>
     </Container>
   );
