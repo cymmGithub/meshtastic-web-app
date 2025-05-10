@@ -8,16 +8,8 @@ WORKDIR /app
 FROM base AS deps
 COPY package.json package-lock.json* ./
 
-# Install JSR CLI globally
-# RUN npm install -g @jsr/cli
-
-# Install dependencies including JSR packages
+# Install dependencies
 RUN npm install
-RUN npx jsr add @meshtastic/core
-RUN npx jsr add @meshtastic/protobufs
-RUN npx jsr add @meshtastic/transport-http
-RUN npx jsr add @meshtastic/transport-web-bluetooth
-RUN npx jsr add @meshtastic/transport-web-serial
 
 # Rebuild the source code only when needed
 FROM base AS builder
