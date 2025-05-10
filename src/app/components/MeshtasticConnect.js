@@ -77,8 +77,8 @@ const MeshtasticConnectComponent = () => {
 		return (
 			<div className='container mx-auto p-4'>
 				<h1 className='text-2xl font-bold mb-4'>Meshtastic Connection</h1>
-				<p className='text-red-500'>
-					Web Bluetooth API nie jest dostępne w Twojej przeglądarce.
+				<p className='text-red-500'> 
+					Web Bluetooth API nie jest dostępne w Twojej przeglądarce. 
 				</p>
 			</div>
 		);
