@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Container, 
-  Flex, 
-  Heading, 
+import {
+  Box,
+  Container,
+  Flex,
+  Heading,
   useColorModeValue,
   Grid,
   GridItem,
@@ -25,7 +25,7 @@ import { SkipLink } from './components/accessibility';
 function App() {
   const { t } = useLanguage();
   const [connectionStatus, setConnectionStatus] = useState(t('disconnected'));
-  const [deviceAddress, setDeviceAddress] = useState('10.10.0.57'); // Default IP
+  const [deviceAddress, setDeviceAddress] = useState('172.19.0.2:4403'); // Default IP
   const [meshtasticDevice, setMeshtasticDevice] = useState(null);
   const [messages, setMessages] = useState([]);
   const [currentMessage, setCurrentMessage] = useState('');
@@ -45,7 +45,7 @@ function App() {
       console.log('Attempting to initialize Meshtastic device...');
       const transport = await TransportHTTP.create(deviceAddress);
       const deviceInstance = new MeshDevice(transport);
-      
+
       setMeshtasticDevice(deviceInstance);
       setConnectionStatus(t('connected'));
       console.log('Meshtastic device initialized:', deviceInstance);
@@ -81,7 +81,7 @@ function App() {
       timestamp: new Date().toLocaleTimeString(),
       status: 'Sent' // This would normally be dynamic based on actual send status
     };
-    
+
     setMessages([newMessage, ...messages]);
     setCurrentMessage('');
   };
@@ -89,22 +89,22 @@ function App() {
   const handleSelectTemplate = (template) => {
     setCurrentMessage(template);
   };
-  
+
   return (
     <Box position="relative">
       {/* Add SkipLink for keyboard accessibility */}
       <SkipLink targetId="main-content" />
-      
+
       <Box minH="100vh" p={4}>
         <Container maxW="container.xl" p={0}>
-          <Flex 
-            as="header" 
-            align="center" 
-            justify="space-between" 
-            py={3} 
-            px={5} 
-            bg={headerBgColor} 
-            borderBottomWidth="1px" 
+          <Flex
+            as="header"
+            align="center"
+            justify="space-between"
+            py={3}
+            px={5}
+            bg={headerBgColor}
+            borderBottomWidth="1px"
             borderColor={borderColor}
           >
             <Heading size="lg" color="blue.500">{t('appTitle')}</Heading>
@@ -115,22 +115,22 @@ function App() {
           </Flex>
 
           <Box id="main-content" as="main" p={4} bg={bgColor} tabIndex={-1} outline="none">
-            <Grid 
-              templateColumns={{ base: "1fr", md: "1fr 1fr" }} 
+            <Grid
+              templateColumns={{ base: "1fr", md: "1fr 1fr" }}
               gap={6}
             >
               <GridItem>
-                <Box 
-                  mb={6} 
-                  p={4} 
-                  bg={useColorModeValue('white', 'gray.800')} 
-                  borderRadius="md" 
-                  boxShadow="sm" 
+                <Box
+                  mb={6}
+                  p={4}
+                  bg={useColorModeValue('white', 'gray.800')}
+                  borderRadius="md"
+                  boxShadow="sm"
                   borderWidth="1px"
                   borderColor={borderColor}
                 >
                   <Heading as="h2" size="md" mb={4}>{t('connectionStatus')}</Heading>
-                  <DeviceConnection 
+                  <DeviceConnection
                     deviceAddress={deviceAddress}
                     onDeviceAddressChange={setDeviceAddress}
                     connectionStatus={connectionStatus}
@@ -140,11 +140,11 @@ function App() {
                   />
                 </Box>
 
-                <Box 
-                  p={4} 
-                  bg={useColorModeValue('white', 'gray.800')} 
-                  borderRadius="md" 
-                  boxShadow="sm" 
+                <Box
+                  p={4}
+                  bg={useColorModeValue('white', 'gray.800')}
+                  borderRadius="md"
+                  boxShadow="sm"
                   borderWidth="1px"
                   borderColor={borderColor}
                 >
@@ -154,27 +154,27 @@ function App() {
               </GridItem>
 
               <GridItem>
-                <Box 
-                  mb={6} 
-                  p={4} 
-                  bg={useColorModeValue('white', 'gray.800')} 
-                  borderRadius="md" 
-                  boxShadow="sm" 
+                <Box
+                  mb={6}
+                  p={4}
+                  bg={useColorModeValue('white', 'gray.800')}
+                  borderRadius="md"
+                  boxShadow="sm"
                   borderWidth="1px"
                   borderColor={borderColor}
                 >
                   <Heading as="h2" size="md" mb={4}>{t('messageInput')}</Heading>
-                  <MessageInput 
+                  <MessageInput
                     initialValue={currentMessage}
                     onSendMessage={handleSendMessage}
                   />
                 </Box>
 
-                <Box 
-                  p={4} 
-                  bg={useColorModeValue('white', 'gray.800')} 
-                  borderRadius="md" 
-                  boxShadow="sm" 
+                <Box
+                  p={4}
+                  bg={useColorModeValue('white', 'gray.800')}
+                  borderRadius="md"
+                  boxShadow="sm"
                   borderWidth="1px"
                   borderColor={borderColor}
                 >
@@ -182,18 +182,18 @@ function App() {
                 </Box>
               </GridItem>
             </Grid>
-            
+
             {/* New Section - Message Inbox */}
             <Box mt={10}>
               <Divider mb={8} />
               <Heading as="h2" size="lg" mb={6}>
                 {t('messages')}
               </Heading>
-              <Box 
-                p={4} 
-                bg={useColorModeValue('white', 'gray.800')} 
-                borderRadius="md" 
-                boxShadow="sm" 
+              <Box
+                p={4}
+                bg={useColorModeValue('white', 'gray.800')}
+                borderRadius="md"
+                boxShadow="sm"
                 borderWidth="1px"
                 borderColor={borderColor}
               >

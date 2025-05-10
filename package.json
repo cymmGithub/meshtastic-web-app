@@ -2,6 +2,7 @@
 	"name": "meshtastic-starter-app",
 	"version": "0.1.0",
 	"private": true,
+	"type": "module",
 	"dependencies": {
 		"@chakra-ui/react": "^2.8.2",
 		"@emotion/react": "^11.11.1",
@@ -25,7 +26,15 @@
 		"start": "react-scripts start",
 		"build": "react-scripts build",
 		"test": "react-scripts test",
-		"eject": "react-scripts eject"
+		"eject": "react-scripts eject",
+		"docker:up": "docker compose up -d",
+		"docker:down": "docker compose down",
+		"docker:logs": "docker compose logs -f",
+		"docker:restart": "docker compose restart",
+		"docker:start": "docker compose up -d && npm run open",
+		"open": "npx open-cli http://localhost:3000",
+		"docker:multi-node": "docker compose -f docker-compose.multi-node.yaml up -d",
+		"docker:multi-node:down": "docker compose -f docker-compose.multi-node.yaml down"
 	},
 	"eslintConfig": {
 		"extends": [

@@ -1,0 +1,73 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+      - MESHTASTIC_HTTP_HOST=meshtasticd-main
+      - MESHTASTIC_HTTP_PORT=4403
+    stdin_open: true
+    tty: true
+    depends_on:
+      - meshtasticd-main
+    networks:
+      - mesh-network
+
+  # Main Meshtastic node
+  meshtasticd-main:
+    image: meshtastic/meshtasticd:beta
+    container_name: meshtasticd-main
+    restart: unless-stopped
+    ports:
+      - "4403:4403"
+    volumes:
+      - ./configs/main-node.yaml:/etc/meshtasticd/config.yaml:ro
+      - mesh-data-main:/var/lib/meshtasticd
+    networks:
+      - mesh-network
+
+  # Additional Meshtastic nodes for simulation
+  meshtasticd-node1:
+    image: meshtastic/meshtasticd:beta
+    container_name: meshtasticd-node1
+    restart: unless-stopped
+    ports:
+      - "4404:4403"
+    volumes:
+      - ./configs/node1.yaml:/etc/meshtasticd/config.yaml:ro
+      - mesh-data-node1:/var/lib/meshtasticd
+    networks:
+      - mesh-network
+
+  meshtasticd-node2:
+    image: meshtastic/meshtasticd:beta
+    container_name: meshtasticd-node2
+    restart: unless-stopped
+    ports:
+      - "4405:4403"
+    volumes:
+      - ./configs/node2.yaml:/etc/meshtasticd/config.yaml:ro
+      - mesh-data-node2:/var/lib/meshtasticd
+    networks:
+      - mesh-network
+
+  # Add more nodes as needed
+
+networks:
+  mesh-network:
+    driver: bridge
+
+volumes:
+  mesh-data-main:
+    driver: local
+  mesh-data-node1:
+    driver: local
+  mesh-data-node2:
+    driver: local
