@@ -9,8 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@meshtastic/core": "npm:@jsr/meshtastic__core@^2.6.2",
+    "@meshtastic/protobufs": "npm:@jsr/meshtastic__protobufs@^2.6.2",
+    "@meshtastic/transport-deno": "npm:@jsr/meshtastic__transport-deno@^0.1.1",
+    "@meshtastic/transport-http": "npm:@jsr/meshtastic__transport-http@^0.2.1",
+    "@meshtastic/transport-web-bluetooth": "npm:@jsr/meshtastic__transport-web-bluetooth@^0.1.1",
+    "@meshtastic/transport-web-serial": "npm:@jsr/meshtastic__transport-web-serial@^0.2.1",
+    "next": "15.3.2",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "next": "15.3.2"
+    "react-dom": "^19.0.0"
   }
 }
