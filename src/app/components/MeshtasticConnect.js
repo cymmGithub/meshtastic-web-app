@@ -2,11 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
+import { MeshDevice } from '@meshtastic/core';
+import { WebBluetoothTransport } from '@meshtastic/transport-web-bluetooth';
 
 const MeshtasticConnectComponent = () => {
+	const [client, setClient] = useState(null);
 	const [connected, setConnected] = useState(false);
 	const [device, setDevice] = useState(null);
 	const [error, setError] = useState(null);
+	const [nodes, setNodes] = useState([]);
 	const [isBluetoothAvailable, setIsBluetoothAvailable] = useState(false);
 
 	useEffect(() => {
@@ -18,31 +22,56 @@ const MeshtasticConnectComponent = () => {
 
 	const connectViaBluetooth = async () => {
 		try {
-			const device = await navigator.bluetooth.requestDevice({
-				acceptAllDevices: true,
-			});
+			const transport = new WebBluetoothTransport();
+			await transport.open();
 
-			setDevice(device);
+			const client = new MeshDevice(transport);
+			await client.connect();
+			
+			setClient(client);
+			setDevice(transport.device);
 			setConnected(true);
 			setError(null);
 
-			device.addEventListener('gattserverdisconnected', () => {
+			// Nasłuchuj na zmiany w liście węzłów
+			client.onNodeListChanged.subscribe((nodeList) => {
+				setNodes(Object.values(nodeList));
+			});
+
+			// Nasłuchuj na wiadomości
+			client.onMessage.subscribe((message) => {
+				console.log('Otrzymano wiadomość:', message);
+			});
+
+			// Nasłuchuj na rozłączenie
+			transport.onDisconnected.subscribe(() => {
 				setConnected(false);
+				setClient(null);
 				setDevice(null);
 			});
 		} catch (error) {
-			console.error('Failed to connect via Bluetooth:', error);
+			console.error('Błąd połączenia Bluetooth:', error);
+			setError(error.message);
+		}
+	};
+
+	const sendMessage = async (text) => {
+		if (!client) return;
+		try {
+			await client.sendText(text);
+		} catch (error) {
+			console.error('Błąd wysyłania wiadomości:', error);
 			setError(error.message);
 		}
 	};
 
 	useEffect(() => {
 		return () => {
-			if (device) {
-				device.gatt?.disconnect();
+			if (client) {
+				client.disconnect();
 			}
 		};
-	}, [device]);
+	}, [client]);
 
 	if (!isBluetoothAvailable) {
 		return (
@@ -76,6 +105,50 @@ const MeshtasticConnectComponent = () => {
 					<p className='text-green-600 font-semibold'>
 						Connected to device: {device?.name || 'Unknown'}
 					</p>
+					
+					<div className='mt-4'>
+						<h2 className='text-xl font-bold mb-2'>Nodes:</h2>
+						<ul className='list-disc pl-5'>
+							{nodes.length > 0 ? (
+								nodes.map((node) => (
+									<li key={node.num} className='mb-1'>
+										{node.user?.longName || 'Unknown'} ({node.num})
+									</li>
+								))
+							) : (
+								<li>No nodes found yet</li>
+							)}
+						</ul>
+					</div>
+
+					<div className='mt-4'>
+						<h2 className='text-xl font-bold mb-2'>Send Message</h2>
+						<div className='flex gap-2'>
+							<input
+								type="text"
+								placeholder="Type your message..."
+								className='flex-1 p-2 border rounded'
+								onKeyPress={(e) => {
+									if (e.key === 'Enter') {
+										sendMessage(e.target.value);
+										e.target.value = '';
+									}
+								}}
+							/>
+							<button
+								onClick={() => {
+									const input = document.querySelector('input');
+									if (input) {
+										sendMessage(input.value);
+										input.value = '';
+									}
+								}}
+								className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
+							>
+								Send
+							</button>
+						</div>
+					</div>
 				</div>
 			)}
 		</div>
