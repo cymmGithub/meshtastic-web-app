@@ -36,7 +36,15 @@ import {
   Alert,
   AlertIcon,
   Checkbox,
-  Stack
+  Stack,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  useDisclosure
 } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
 import { 
@@ -113,10 +121,38 @@ const mockUserRequests = [
 ];
 
 const mockTemplates = [
-  { id: 'tpl-1', name: 'evacuationAlert', category: 'evacuation', priority: 'high', usageCount: 14 },
-  { id: 'tpl-2', name: 'medicalAidAvailable', category: 'medicalEmergency', priority: 'medium', usageCount: 8 },
-  { id: 'tpl-3', name: 'powerOutageUpdate', category: 'infrastructure', priority: 'low', usageCount: 22 },
-  { id: 'tpl-4', name: 'foodDistribution', category: 'resources', priority: 'medium', usageCount: 19 }
+  { 
+    id: 'tpl-1', 
+    name: 'evacuationAlert', 
+    category: 'evacuation', 
+    priority: 'high', 
+    usageCount: 14,
+    content: 'PILNE: Wymagana ewakuacja w Twojej okolicy. Udaj się natychmiast do najbliższego schronienia. Zabierz tylko niezbędne rzeczy i postępuj zgodnie z oficjalnymi instrukcjami.'
+  },
+  { 
+    id: 'tpl-2', 
+    name: 'medicalAidAvailable', 
+    category: 'medicalEmergency', 
+    priority: 'medium', 
+    usageCount: 8,
+    content: 'Pomoc medyczna jest teraz dostępna w następujących lokalizacjach: Park Centralny (24h), Szpital Wschodni (8-20), oraz jednostki mobilne w dzielnicy północnej.'
+  },
+  { 
+    id: 'tpl-3', 
+    name: 'powerOutageUpdate', 
+    category: 'infrastructure', 
+    priority: 'low', 
+    usageCount: 22,
+    content: 'Przerwa w dostawie prądu w sektorach 3, 4 i 7. Przewidywany czas przywrócenia: 18:00. Awaryjne zasilanie dostępne w centrach społecznościowych.'
+  },
+  { 
+    id: 'tpl-4', 
+    name: 'foodDistribution', 
+    category: 'resources', 
+    priority: 'medium', 
+    usageCount: 19,
+    content: 'Punkty dystrybucji żywności i wody utworzono w: Główny Plac, Szkoła Centralna i Arena Sportowa. Godziny dystrybucji: 8:00-18:00. Prosimy o zabranie dokumentu tożsamości i pojemników na wodę.'
+  }
 ];
 
 const AdminDashboard = () => {
@@ -127,7 +163,14 @@ const AdminDashboard = () => {
   const [targetAudience, setTargetAudience] = useState('all');
   const [userRequests, setUserRequests] = useState(mockUserRequests);
   const [selectedRequests, setSelectedRequests] = useState([]);
+  const [templates, setTemplates] = useState(mockTemplates);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure();
+  const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
   const toast = useToast();
+  const [templateContent, setTemplateContent] = useState({});
+  const { isOpen: isViewOpen, onOpen: onViewOpen, onClose: onViewClose } = useDisclosure();
+  const [editingTemplateContent, setEditingTemplateContent] = useState('');
 
   // Theme-aware colors
   const bgColor = useColorModeValue('white', 'gray.900');
@@ -267,6 +310,161 @@ const AdminDashboard = () => {
     }
   };
   
+  // Template handlers
+  const handleEditTemplate = (template) => {
+    setSelectedTemplate({...template});
+    onEditOpen();
+  };
+
+  const handleDeleteTemplate = (template) => {
+    setSelectedTemplate(template);
+    onDeleteOpen();
+  };
+
+  const handleTemplateFormChange = (field, value) => {
+    setSelectedTemplate(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSaveTemplate = () => {
+    if (selectedTemplate) {
+      setTemplates(prev => 
+        prev.map(tpl => 
+          tpl.id === selectedTemplate.id ? selectedTemplate : tpl
+        )
+      );
+      
+      toast({
+        title: t('templateUpdated') || 'Template Updated',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+      
+      onEditClose();
+    }
+  };
+
+  const handleConfirmDelete = () => {
+    if (selectedTemplate) {
+      setTemplates(prev => 
+        prev.filter(tpl => tpl.id !== selectedTemplate.id)
+      );
+      
+      toast({
+        title: t('templateDeleted') || 'Template Deleted',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+      
+      onDeleteClose();
+    }
+  };
+
+  const handleAddNewTemplate = () => {
+    const newId = `tpl-${templates.length + 1}`;
+    const defaultCategory = 'urgentHelp';
+    
+    // Create default content based on category
+    const defaultContent = t('defaultTemplateContent') || 'Wprowadź treść wiadomości alarmu...';
+    
+    setSelectedTemplate({
+      id: newId,
+      name: '',
+      category: defaultCategory,
+      priority: 'medium',
+      usageCount: 0,
+      content: defaultContent
+    });
+    onEditOpen();
+  };
+
+  // Add template view functionality
+  const handleViewTemplate = (template) => {
+    // Get the translated content or fall back to template content
+    const templateContents = {
+      'evacuationAlert': t('evacuationAlertContent'),
+      'medicalAidAvailable': t('medicalAidContent'),
+      'powerOutageUpdate': t('powerOutageContent'),
+      'foodDistribution': t('foodDistributionContent')
+    };
+    
+    // Use template's content first, then fallback to translations if available, then use default content
+    const content = template.content || 
+                    (templateContents[template.name] || 
+                    `${t(template.name)} - ${t(template.category) || template.category}`);
+    
+    setTemplateContent({
+      name: t(template.name),
+      content: content,
+      id: template.id,
+      category: template.category,
+      priority: template.priority
+    });
+    
+    setEditingTemplateContent(content);
+    onViewOpen();
+  };
+
+  // Modify the handleSaveTemplateContent function to close the modal after saving
+  const handleSaveTemplateContent = () => {
+    // Update the template content in our templates array
+    // In a real app, this would save to a database
+    if (templateContent.id) {
+      setTemplates(prev => 
+        prev.map(tpl => 
+          tpl.id === templateContent.id 
+            ? { ...tpl, content: editingTemplateContent } 
+            : tpl
+        )
+      );
+    }
+    
+    // Also update the current templateContent state
+    setTemplateContent(prev => ({
+      ...prev,
+      content: editingTemplateContent
+    }));
+    
+    toast({
+      title: t('templateContentSaved') || 'Template Content Saved',
+      status: 'success',
+      duration: 3000,
+      isClosable: true,
+    });
+    
+    // Close the modal after saving
+    onViewClose();
+  };
+
+  // Add a function to handle sending the message
+  const handleSendTemplate = () => {
+    // In a real app, this would send the message
+    if (templateContent.id) {
+      // Update the usage count for the template
+      setTemplates(prev => 
+        prev.map(tpl => 
+          tpl.id === templateContent.id 
+            ? { ...tpl, usageCount: tpl.usageCount + 1, content: editingTemplateContent } 
+            : tpl
+        )
+      );
+    }
+    
+    toast({
+      title: t('templateMessageSent') || 'Template Message Sent',
+      description: t('messageHasBeenSent') || 'Your message has been sent to all recipients',
+      status: 'success',
+      duration: 3000,
+      isClosable: true,
+    });
+    
+    onViewClose();
+  };
+
   return (
     <Box position="relative">
       {/* Add SkipLink for keyboard accessibility */}
@@ -693,37 +891,67 @@ const AdminDashboard = () => {
                         size="sm" 
                         colorScheme="purple" 
                         leftIcon={<Icon as={FiPlus} />}
+                        onClick={handleAddNewTemplate}
                       >
                         {t('addTemplate')}
                       </Button>
                     </Flex>
                     
-                    {mockTemplates.map((template) => (
-                      <Card key={template.id} variant="outline" borderRadius="md">
-                        <CardBody p={4}>
-                          <Grid templateColumns={{ base: "1fr", md: "1fr 120px 120px 100px" }} gap={4} alignItems="center">
-                            <Box>
-                              <Text fontWeight="bold">{t(template.name)}</Text>
-                              <Text fontSize="sm" color="gray.500">{t('category')}: {t(template.category)}</Text>
-                            </Box>
-                            <Badge colorScheme={getPriorityColor(template.priority)} w="fit-content">
-                              {t(template.priority)}
-                            </Badge>
-                            <Text fontSize="sm">
-                              {t('usedTimes', { count: template.usageCount })}
-                            </Text>
-                            <HStack spacing={2}>
-                              <Button size="sm" colorScheme="blue" variant="outline">
-                                {t('edit')}
-                              </Button>
-                              <Button size="sm" colorScheme="red" variant="ghost">
-                                {t('delete')}
-                              </Button>
-                            </HStack>
-                          </Grid>
-                        </CardBody>
-                      </Card>
-                    ))}
+                    {templates.length > 0 ? (
+                      templates.map((template) => (
+                        <Card key={template.id} variant="outline" borderRadius="md" cursor="pointer" onClick={() => handleViewTemplate(template)}>
+                          <CardBody p={4}>
+                            <Grid templateColumns={{ base: "1fr", md: "1fr 120px 120px 100px" }} gap={4} alignItems="center">
+                              <Box>
+                                <Text fontWeight="bold">{t(template.name)}</Text>
+                                <Text fontSize="sm" color="gray.500">{t('category')}: {t(template.category)}</Text>
+                              </Box>
+                              <Badge colorScheme={getPriorityColor(template.priority)} w="fit-content">
+                                {t(template.priority)}
+                              </Badge>
+                              <Text fontSize="sm">
+                                {t('usedTimes', { count: template.usageCount })}
+                              </Text>
+                              <HStack spacing={2} onClick={(e) => e.stopPropagation()}>
+                                <Button 
+                                  size="sm" 
+                                  colorScheme="blue" 
+                                  variant="outline"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEditTemplate(template);
+                                  }}
+                                >
+                                  {t('edit')}
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  colorScheme="red" 
+                                  variant="ghost"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteTemplate(template);
+                                  }}
+                                >
+                                  {t('delete')}
+                                </Button>
+                              </HStack>
+                            </Grid>
+                          </CardBody>
+                        </Card>
+                      ))
+                    ) : (
+                      <Box 
+                        p={6} 
+                        textAlign="center" 
+                        borderRadius="md" 
+                        borderWidth="1px"
+                        borderColor={borderColor}
+                      >
+                        <Heading size="md" mb={2}>{t('noTemplates') || 'No Templates'}</Heading>
+                        <Text>{t('noTemplatesDesc') || 'There are no message templates defined yet. Click "Add Template" to create one.'}</Text>
+                      </Box>
+                    )}
                   </VStack>
                 </TabPanel>
                 
@@ -762,6 +990,142 @@ const AdminDashboard = () => {
           </Box>
         </Container>
       </Box>
+
+      {/* Edit Template Modal */}
+      <Modal isOpen={isEditOpen} onClose={onEditClose} size="lg">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>
+            {selectedTemplate?.id.includes('new') ? t('addTemplate') : t('editTemplate') || 'Edit Template'}
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            {selectedTemplate && (
+              <VStack spacing={4} align="stretch">
+                <FormControl isRequired>
+                  <FormLabel>{t('templateName') || 'Template Name'}</FormLabel>
+                  <Select
+                    value={selectedTemplate.name}
+                    onChange={(e) => handleTemplateFormChange('name', e.target.value)}
+                  >
+                    <option value="evacuationAlert">{t('evacuationAlert')}</option>
+                    <option value="medicalAidAvailable">{t('medicalAidAvailable')}</option>
+                    <option value="powerOutageUpdate">{t('powerOutageUpdate')}</option>
+                    <option value="foodDistribution">{t('foodDistribution')}</option>
+                  </Select>
+                </FormControl>
+                
+                <FormControl isRequired>
+                  <FormLabel>{t('category')}</FormLabel>
+                  <Select
+                    value={selectedTemplate.category}
+                    onChange={(e) => handleTemplateFormChange('category', e.target.value)}
+                  >
+                    {categories.map((category) => (
+                      <option key={category} value={category}>
+                        {t(category)}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+                
+                <FormControl isRequired>
+                  <FormLabel>{t('priority')}</FormLabel>
+                  <Select
+                    value={selectedTemplate.priority}
+                    onChange={(e) => handleTemplateFormChange('priority', e.target.value)}
+                  >
+                    <option value="critical">{t('critical')}</option>
+                    <option value="high">{t('high')}</option>
+                    <option value="medium">{t('medium')}</option>
+                    <option value="low">{t('low')}</option>
+                  </Select>
+                </FormControl>
+              </VStack>
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="ghost" mr={3} onClick={onEditClose}>
+              {t('cancel')}
+            </Button>
+            <Button colorScheme="blue" onClick={handleSaveTemplate}>
+              {t('save') || 'Save'}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal isOpen={isDeleteOpen} onClose={onDeleteClose} isCentered size="sm">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>{t('confirmDelete') || 'Confirm Delete'}</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Text>
+              {t('deleteTemplateConfirmation') || 'Are you sure you want to delete this template?'} 
+              {selectedTemplate && <b> {t(selectedTemplate.name)}</b>}
+            </Text>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="ghost" mr={3} onClick={onDeleteClose}>
+              {t('cancel')}
+            </Button>
+            <Button colorScheme="red" onClick={handleConfirmDelete}>
+              {t('delete')}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* View Template Modal */}
+      <Modal isOpen={isViewOpen} onClose={onViewClose} size="lg">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>{templateContent.name}</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <FormControl mb={4}>
+              <FormLabel>{t('messageContent') || 'Message Content'}</FormLabel>
+              <Textarea
+                value={editingTemplateContent}
+                onChange={(e) => setEditingTemplateContent(e.target.value)}
+                minHeight="150px"
+                p={4}
+                bg={useColorModeValue('gray.50', 'gray.700')}
+                borderRadius="md"
+              />
+            </FormControl>
+            
+            {/* Display template metadata */}
+            <SimpleGrid columns={2} spacing={4} mb={4}>
+              <Box>
+                <Text fontWeight="bold">{t('category')}:</Text>
+                <Badge colorScheme={getPriorityColor(templateContent.category || 'medium')}>
+                  {templateContent.category ? t(templateContent.category) : ''}
+                </Badge>
+              </Box>
+              <Box>
+                <Text fontWeight="bold">{t('priority')}:</Text>
+                <Badge colorScheme={getPriorityColor(templateContent.priority || 'medium')}>
+                  {templateContent.priority ? t(templateContent.priority) : ''}
+                </Badge>
+              </Box>
+            </SimpleGrid>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="ghost" mr={2} onClick={onViewClose}>
+              {t('cancel') || 'Cancel'}
+            </Button>
+            <Button colorScheme="blue" mr={2} onClick={handleSaveTemplateContent}>
+              {t('save') || 'Save'}
+            </Button>
+            <Button colorScheme="purple" leftIcon={<Icon as={FiSend} />} onClick={handleSendTemplate}>
+              {t('send') || 'Send'}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 };
