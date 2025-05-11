@@ -98,22 +98,44 @@ const LandingPage = () => {
 
       {/* Main content */}
       <Container maxW="container.xl" py={6} px={4}>
-        {/* Hero section with image on right and text on left (desktop) */}
-        <Flex
-          direction={{ base: "column", lg: "row" }}
-          mb={10}
-          borderRadius="xl"
-          overflow="hidden"
+        {/* Hero section with image on top for mobile, side-by-side on desktop */}
+        <Flex 
+          direction={{ base: "column", lg: "row" }} 
+          mb={10} 
+          borderRadius="xl" 
+          overflow="hidden" 
           boxShadow="xl"
           bg={cardBgColor}
         >
-          {/* Left side - Text content */}
-          <Flex
-            direction="column"
+          {/* Order is reversed on mobile: image first, then text */}
+          
+          {/* Image (top on mobile, right on desktop) */}
+          <Box 
+            flex={{ lg: 1 }}
+            h={{ base: "250px", md: "300px", lg: "auto" }}
+            position="relative"
+            order={{ base: 1, lg: 2 }}
+          >
+            <Image 
+              src="/main-photo.png"
+              alt={
+                t("heroImageAlt") ||
+                "People connected in a communication network"
+              }
+              objectFit="cover"
+              w="100%"
+              h="100%"
+            />
+          </Box>
+          
+          {/* Text content (below image on mobile, left on desktop) */}
+          <Flex 
+            direction="column" 
             justify="center"
-            p={{ base: 6, md: 10 }}
+            p={{ base: 6, md: 10 }} 
             flex={{ lg: 1 }}
             zIndex={2}
+            order={{ base: 2, lg: 1 }}
           >
             <Heading
               as="h2"
@@ -181,24 +203,6 @@ const LandingPage = () => {
               <Icon as={FiArrowRight} boxSize={4} ml={2} />
             </Flex>
           </Flex>
-
-          {/* Right side - Image (stacked on mobile, side-by-side on desktop) */}
-          <Box
-            flex={{ lg: 1 }}
-            h={{ base: "250px", md: "300px", lg: "auto" }}
-            position="relative"
-          >
-            <Image
-              src="/landing-img.png"
-              alt={
-                t("heroImageAlt") ||
-                "People connected in a communication network"
-              }
-              objectFit="cover"
-              w="100%"
-              h="100%"
-            />
-          </Box>
         </Flex>
 
         {/* VStack for the rest of the content */}
