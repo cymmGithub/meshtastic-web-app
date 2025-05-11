@@ -57,18 +57,42 @@ const MessageItem = ({ message, onAcknowledge }) => {
   const iconColor = useColorModeValue('gray.500', 'gray.400');
   
   // Format time for display
-  const timeAgo = formatDistanceToNow(new Date(message.timestamp), { 
+  const timeAgo = message.timestamp ? formatDistanceToNow(new Date(message.timestamp), { 
     addSuffix: true 
-  });
+  }) : t('noTimestamp');
   
   // Format expiration date
-  const expirationDate = format(new Date(message.expiresAt), 'MMM dd, yyyy');
+  const expirationDate = message.expiresAt ? format(new Date(message.expiresAt), 'MMM dd, yyyy') : t('noExpirationDate');
   
   // Determine if this is a critical message
   const isCritical = message.priority === 'critical';
   
   // Get the appropriate category icon
-  const CategoryIcon = getCategoryIcon(message.category);
+  const CategoryIcon = getCategoryIcon(message.category || 'custom');
+  
+  // Get message content based on structure
+  const getMessageContent = () => {
+    if (message.content && typeof message.content === 'object') {
+      return message.content[language] || message.content.en || message.content;
+    }
+    return message.content;
+  };
+
+  // Get message title based on structure
+  const getMessageTitle = () => {
+    if (message.title && typeof message.title === 'object') {
+      return message.title[language] || message.title.en || message.title;
+    }
+    return message.title || t('noTitle');
+  };
+
+  // Get sender name based on structure
+  const getSenderName = () => {
+    if (message.sender && message.sender.name && typeof message.sender.name === 'object') {
+      return message.sender.name[language] || message.sender.name.en || message.sender.name;
+    }
+    return message.senderId || t('unknownSender');
+  };
   
   return (
     <Box 
@@ -79,7 +103,7 @@ const MessageItem = ({ message, onAcknowledge }) => {
       borderColor={borderColor}
       transition="all 0.2s"
       _hover={{
-        borderColor: `${getPriorityColor(message.priority)}.400`,
+        borderColor: `${getPriorityColor(message.priority || 'medium')}.400`,
         bg: boxHoverBg
       }}
       role="article"
@@ -90,7 +114,7 @@ const MessageItem = ({ message, onAcknowledge }) => {
         px={4} 
         py={3}
         borderLeftWidth="4px"
-        borderLeftColor={`${getPriorityColor(message.priority)}.500`}
+        borderLeftColor={`${getPriorityColor(message.priority || 'medium')}.500`}
         cursor="pointer"
         onClick={onToggle}
       >
@@ -99,7 +123,7 @@ const MessageItem = ({ message, onAcknowledge }) => {
             <Icon 
               as={CategoryIcon} 
               mr={3} 
-              color={`${getPriorityColor(message.priority)}.500`} 
+              color={`${getPriorityColor(message.priority || 'medium')}.500`} 
               boxSize={5}
               aria-hidden="true"
             />
@@ -110,7 +134,7 @@ const MessageItem = ({ message, onAcknowledge }) => {
               isTruncated
               fontWeight="600"
             >
-              {message.title[language]}
+              {getMessageTitle()}
               
               {/* If acknowledgment required and not yet acknowledged */}
               {message.requiresAcknowledgment && !message.acknowledged && (
@@ -125,8 +149,8 @@ const MessageItem = ({ message, onAcknowledge }) => {
           
           <HStack spacing={2}>
             {/* Priority badge */}
-            <Badge colorScheme={getPriorityColor(message.priority)}>
-              {t(message.priority)}
+            <Badge colorScheme={getPriorityColor(message.priority || 'medium')}>
+              {t(message.priority || 'medium')}
             </Badge>
             
             {/* Expand/collapse button */}
@@ -146,7 +170,7 @@ const MessageItem = ({ message, onAcknowledge }) => {
         {/* Sender information */}
         <Flex align="center" mt={1} color="gray.500" fontSize="sm">
           <Text fontWeight="medium">
-            {t('from')}: {message.sender.name[language]}
+            {t('from')}: {getSenderName()}
           </Text>
           <Text mx={2}>•</Text>
           <Flex align="center">
@@ -175,8 +199,8 @@ const MessageItem = ({ message, onAcknowledge }) => {
         >
           {/* Message content with text-to-speech button */}
           <Flex align="center" justify="space-between">
-            <Text mb={4} flex="1">{message.content[language]}</Text>
-            <TextToSpeech text={message.content[language]} />
+            <Text mb={4} flex="1">{getMessageContent()}</Text>
+            <TextToSpeech text={getMessageContent()} />
           </Flex>
           
           {/* Meta information */}
@@ -192,10 +216,10 @@ const MessageItem = ({ message, onAcknowledge }) => {
             <HStack spacing={4} mb={{ base: 2, md: 0 }}>
               <Text>{t('expiresOn')}: {expirationDate}</Text>
               
-              {message.targetAudience.includes('all-citizens') ? (
+              {message.targetAudience && message.targetAudience.includes('all-citizens') ? (
                 <Text>{t('targetAudience')}: {t('allCitizens')}</Text>
               ) : (
-                <Text>{t('targetAudience')}: {message.targetAudience.join(', ')}</Text>
+                <Text>{t('targetAudience')}: {message.targetAudience ? message.targetAudience.join(', ') : t('allCitizens')}</Text>
               )}
             </HStack>
             <Spacer display={{ base: 'block', md: 'none' }} />

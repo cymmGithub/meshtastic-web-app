@@ -168,7 +168,11 @@ export const translations = {
     foodDistributionContent: 'Food and water distribution points established at: Main Square, Central School, and Sports Arena. Distribution times: 8AM-6PM. Please bring ID and containers for water.',
     templateContentSaved: 'Template Content Saved',
     templateMessageSent: 'Template Message Sent',
-    defaultTemplateContent: 'Enter emergency alert message content...'
+    defaultTemplateContent: 'Enter emergency alert message content...',
+    noTimestamp: 'No timestamp available',
+    noExpirationDate: 'No expiration date',
+    noTitle: 'No title',
+    unknownSender: 'Unknown sender'
   },
   pl: {
     appTitle: 'Awaryjna Komunikacja Mesh',
@@ -339,7 +343,11 @@ export const translations = {
     foodDistributionContent: 'Punkty dystrybucji żywności i wody utworzono w: Główny Plac, Szkoła Centralna i Arena Sportowa. Godziny dystrybucji: 8AM-6PM. Prosimy o zabranie dokumentu tożsamości i pojemników na wodę.',
     templateContentSaved: 'Treść szablonu zapisana',
     templateMessageSent: 'Wiadomość z szablonu wysłana',
-    defaultTemplateContent: 'Wprowadź treść wiadomości alarmu...'
+    defaultTemplateContent: 'Wprowadź treść wiadomości alarmu...',
+    noTimestamp: 'Brak znacznika czasu',
+    noExpirationDate: 'Brak daty wygaśnięcia',
+    noTitle: 'Brak tytułu',
+    unknownSender: 'Nieznany nadawca'
   },
   ua: {
     appTitle: 'Екстрена комунікація Mesh',
@@ -510,7 +518,11 @@ export const translations = {
     foodDistributionContent: 'Пункти розподілу їжі та води встановлені на: Головній площі, Центральній школі та Спортивній арені. Час розподілу: 8:00-18:00. Будь ласка, візьміть з собою посвідчення особи та ємності для води.',
     templateContentSaved: 'Вміст шаблону збережено',
     templateMessageSent: 'Повідомлення з шаблону надіслано',
-    defaultTemplateContent: 'Введіть вміст повідомлення про надзвичайну ситуацію...'
+    defaultTemplateContent: 'Введіть вміст повідомлення про надзвичайну ситуацію...',
+    noTimestamp: 'No timestamp available',
+    noExpirationDate: 'No expiration date',
+    noTitle: 'Без назви',
+    unknownSender: 'Невідомий відправник'
   },
   ru: {
     appTitle: 'Аварийная связь Mesh',
@@ -681,6 +693,10 @@ export const translations = {
     foodDistributionContent: 'Пункты распределения еды и воды установлены на: Главной площади, Центральной школе и Спортивной арене. Время раздачи: 8:00-18:00. Пожалуйста, возьмите с собою удостоверение личности и емкости для воды.',
     templateContentSaved: 'Содержимое шаблона сохранено',
     templateMessageSent: 'Сообщение из шаблона отправлено',
-    defaultTemplateContent: 'Введите содержание сообщения об экстренной ситуации...'
+    defaultTemplateContent: 'Введите содержание сообщения об экстренной ситуации...',
+    noTimestamp: 'No timestamp available',
+    noExpirationDate: 'No expiration date',
+    noTitle: 'Без названия',
+    unknownSender: 'Неизвестный отправитель'
   }
 } 
