@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -34,7 +34,9 @@ import {
   StatHelpText,
   SimpleGrid,
   Alert,
-  AlertIcon
+  AlertIcon,
+  Checkbox,
+  Stack
 } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
 import { 
@@ -47,13 +49,16 @@ import {
   FiList,
   FiActivity,
   FiDatabase,
-  FiPlus
+  FiPlus,
+  FiMessageSquare,
+  FiCheckCircle
 } from 'react-icons/fi';
 import { useLanguage } from '../../i18n/LanguageContext.js';
 import LanguageSelector from '../../components/ui/LanguageSelector.js';
 import ThemeToggle from '../../components/ui/ThemeToggle.js';
 import { SkipLink } from '../../components/accessibility/index.js';
 import { categories } from '../../utils/templateData.js';
+import { mockMessages } from '../../utils/mockMessages.js';
 
 // Mock data for testing
 const mockNodes = [
@@ -61,6 +66,50 @@ const mockNodes = [
   { id: 'node-2', name: t => t('centralDistrict') || 'Central Square', status: 'online', users: 18, battery: 52, signal: 'signalMedium' },
   { id: 'node-3', name: t => t('eastDistrict') || 'East Hospital', status: 'offline', users: 0, battery: 23, signal: 'poor' },
   { id: 'node-4', name: t => t('schoolZone') || 'School Zone', status: 'online', users: 12, battery: 78, signal: 'good' }
+];
+
+// Mock user help requests
+const mockUserRequests = [
+  { 
+    id: 'req-001', 
+    sender: 'Mieszkaniec Dzielnicy A',
+    userLocation: 'Dzielnica północna',
+    category: 'urgentHelp',
+    message: 'Potrzebuję pomocy z ewakuacją. Mam niepełnosprawne dziecko i nie mogę samodzielnie opuścić budynku.',
+    timestamp: '2023-06-15T16:45:00Z',
+    status: 'pending',
+    priority: 'high'
+  },
+  { 
+    id: 'req-002', 
+    sender: 'Wolontariusz',
+    userLocation: 'Dzielnica centralna',
+    category: 'resources',
+    message: 'W centrum ewakuacyjnym kończy się woda pitna. Potrzebujemy dostaw dla około 50 osób.',
+    timestamp: '2023-06-15T17:30:00Z',
+    status: 'inProgress',
+    priority: 'medium'
+  },
+  { 
+    id: 'req-003', 
+    sender: 'Pielęgniarka',
+    userLocation: 'Dzielnica wschodnia',
+    category: 'medicalEmergency',
+    message: 'Potrzebujemy insulin i leków na nadciśnienie w szpitalu. Wielu pacjentów nie ma swoich leków.',
+    timestamp: '2023-06-15T18:15:00Z',
+    status: 'pending',
+    priority: 'critical'
+  },
+  { 
+    id: 'req-004', 
+    sender: 'Mieszkaniec',
+    userLocation: 'Strefa szkolna',
+    category: 'infrastructure',
+    message: 'Uszkodzony most na ulicy Kwiatowej uniemożliwia ewakuację. Nikt nie może się tędy dostać.',
+    timestamp: '2023-06-16T09:00:00Z',
+    status: 'pending',
+    priority: 'high'
+  }
 ];
 
 const mockTemplates = [
@@ -71,11 +120,13 @@ const mockTemplates = [
 ];
 
 const AdminDashboard = () => {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [broadcastMessage, setBroadcastMessage] = useState('');
   const [messageCategory, setMessageCategory] = useState('');
   const [messagePriority, setMessagePriority] = useState('medium');
   const [targetAudience, setTargetAudience] = useState('all');
+  const [userRequests, setUserRequests] = useState(mockUserRequests);
+  const [selectedRequests, setSelectedRequests] = useState([]);
   const toast = useToast();
 
   // Theme-aware colors
@@ -86,6 +137,13 @@ const AdminDashboard = () => {
   const statsCardBg = useColorModeValue('blue.50', 'blue.900');
   const cardHeaderBg = useColorModeValue('gray.50', 'gray.700');
   const logsBg = useColorModeValue('gray.50', 'gray.800');
+  const requestCardBg = useColorModeValue('white', 'gray.700');
+  
+  // Load mockMessages on mount
+  useEffect(() => {
+    // In a real app, this would be an API call
+    console.log('Loading user requests...');
+  }, []);
   
   // Stats overview (mock data)
   const stats = {
@@ -122,6 +180,34 @@ const AdminDashboard = () => {
     setMessagePriority('medium');
     setTargetAudience('all');
   };
+
+  // Handle user request selection
+  const handleRequestSelect = (requestId) => {
+    setSelectedRequests(prev => {
+      if (prev.includes(requestId)) {
+        return prev.filter(id => id !== requestId);
+      } else {
+        return [...prev, requestId];
+      }
+    });
+  };
+
+  // Handle user request status update
+  const handleUpdateRequestStatus = (requestId, newStatus) => {
+    setUserRequests(prev => 
+      prev.map(req => 
+        req.id === requestId ? { ...req, status: newStatus } : req
+      )
+    );
+
+    toast({
+      title: t('requestUpdated') || 'Request Updated',
+      description: t('requestStatusChanged') || 'The request status has been updated',
+      status: 'success',
+      duration: 3000,
+      isClosable: true,
+    });
+  };
   
   const getStatusColor = (status) => {
     switch(status) {
@@ -147,6 +233,37 @@ const AdminDashboard = () => {
       case 'medium': return 'blue';
       case 'low': return 'green';
       default: return 'gray';
+    }
+  };
+
+  const getRequestStatusColor = (status) => {
+    switch(status) {
+      case 'pending': return 'yellow';
+      case 'inProgress': return 'blue';
+      case 'resolved': return 'green';
+      case 'rejected': return 'red';
+      default: return 'gray';
+    }
+  };
+
+  const getRequestStatusLabel = (status) => {
+    switch(status) {
+      case 'pending': return t('requestPending') || 'Pending';
+      case 'inProgress': return t('requestInProgress') || 'In Progress';
+      case 'resolved': return t('requestResolved') || 'Resolved';
+      case 'rejected': return t('requestRejected') || 'Rejected';
+      default: return status;
+    }
+  };
+
+  const getCategoryIcon = (category) => {
+    switch(category) {
+      case 'urgentHelp': return FiAlertTriangle;
+      case 'medicalEmergency': return FiActivity;
+      case 'evacuation': return FiUsers;
+      case 'resources': return FiDatabase;
+      case 'infrastructure': return FiRadio;
+      default: return FiMessageSquare;
     }
   };
   
@@ -197,10 +314,10 @@ const AdminDashboard = () => {
                 bg={statsCardBg}
               >
                 <StatLabel display="flex" alignItems="center">
-                  <Icon as={FiRadio} mr={2} /> {t('activeNodes') || 'Active Nodes'}
+                  <Icon as={FiRadio} mr={2} /> {t('activeNodes')}
                 </StatLabel>
                 <StatNumber>{stats.activeNodes}</StatNumber>
-                <StatHelpText>{t('totalConnectedNodes') || 'Total connected nodes'}</StatHelpText>
+                <StatHelpText>{t('totalConnectedNodes')}</StatHelpText>
               </Stat>
               
               <Stat
@@ -210,10 +327,10 @@ const AdminDashboard = () => {
                 bg={statsCardBg}
               >
                 <StatLabel display="flex" alignItems="center">
-                  <Icon as={FiUsers} mr={2} /> {t('onlineUsers') || 'Online Users'}
+                  <Icon as={FiUsers} mr={2} /> {t('onlineUsers')}
                 </StatLabel>
                 <StatNumber>{stats.onlineUsers}</StatNumber>
-                <StatHelpText>{t('connectedToNetwork') || 'Connected to network'}</StatHelpText>
+                <StatHelpText>{t('connectedToNetwork')}</StatHelpText>
               </Stat>
               
               <Stat
@@ -223,10 +340,10 @@ const AdminDashboard = () => {
                 bg={statsCardBg}
               >
                 <StatLabel display="flex" alignItems="center">
-                  <Icon as={FiSend} mr={2} /> {t('pendingMessages') || 'Pending Messages'}
+                  <Icon as={FiSend} mr={2} /> {t('pendingMessages')}
                 </StatLabel>
                 <StatNumber>{stats.pendingMessages}</StatNumber>
-                <StatHelpText>{t('awaitingDelivery') || 'Awaiting delivery'}</StatHelpText>
+                <StatHelpText>{t('awaitingDelivery')}</StatHelpText>
               </Stat>
               
               <Stat
@@ -236,43 +353,44 @@ const AdminDashboard = () => {
                 bg={statsCardBg}
               >
                 <StatLabel display="flex" alignItems="center">
-                  <Icon as={FiActivity} mr={2} /> {t('batteryAvg') || 'Avg. Battery'}
+                  <Icon as={FiActivity} mr={2} /> {t('batteryAvg')}
                 </StatLabel>
                 <StatNumber>{stats.batteryAvg}%</StatNumber>
-                <StatHelpText>{t('acrossAllNodes') || 'Across all nodes'}</StatHelpText>
+                <StatHelpText>{t('acrossAllNodes')}</StatHelpText>
               </Stat>
             </SimpleGrid>
             
             {/* System Alert */}
             <Alert status="warning" mb={6} borderRadius="md">
               <AlertIcon />
-              <Text>{t('lowBatteryWarning') || 'East Hospital node battery is critically low (23%). Please replace or recharge.'}</Text>
+              <Text>{t('lowBatteryWarning')}</Text>
             </Alert>
             
             {/* Main Tabs Interface */}
             <Tabs variant="enclosed" colorScheme="purple" bg={tabBgColor} borderRadius="md" boxShadow="sm">
               <TabList mb={4} overflowX="auto" css={{ scrollbarWidth: 'thin' }}>
-                <Tab><Icon as={FiSend} mr={2} /> {t('broadcast') || 'Broadcast'}</Tab>
-                <Tab><Icon as={FiRadio} mr={2} /> {t('nodes') || 'Nodes'}</Tab>
-                <Tab><Icon as={FiList} mr={2} /> {t('templates') || 'Templates'}</Tab>
-                <Tab><Icon as={FiDatabase} mr={2} /> {t('logs') || 'System Logs'}</Tab>
+                <Tab><Icon as={FiSend} mr={2} /> {t('broadcast')}</Tab>
+                <Tab><Icon as={FiMessageSquare} mr={2} /> {t('userMessages')}</Tab>
+                <Tab><Icon as={FiRadio} mr={2} /> {t('nodes')}</Tab>
+                <Tab><Icon as={FiList} mr={2} /> {t('templates')}</Tab>
+                <Tab><Icon as={FiDatabase} mr={2} /> {t('logs')}</Tab>
               </TabList>
               
               <TabPanels>
                 {/* Broadcast Tab */}
                 <TabPanel>
                   <VStack spacing={6} align="stretch">
-                    <Heading as="h2" size="md" mb={2}>{t('broadcastMessage') || 'Broadcast Emergency Message'}</Heading>
+                    <Heading as="h2" size="md" mb={2}>{t('broadcastMessage')}</Heading>
                     
                     <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
                       <GridItem>
                         <FormControl isRequired mb={4}>
                           <FormLabel htmlFor="message-category">
-                            {t('messageCategory') || 'Message Category'}
+                            {t('messageCategory')}
                           </FormLabel>
                           <Select 
                             id="message-category"
-                            placeholder={t('selectCategory') || 'Select category'}
+                            placeholder={t('selectCategory')}
                             value={messageCategory}
                             onChange={(e) => setMessageCategory(e.target.value)}
                           >
@@ -286,34 +404,34 @@ const AdminDashboard = () => {
                         
                         <FormControl isRequired mb={4}>
                           <FormLabel htmlFor="message-priority">
-                            {t('messagePriority') || 'Message Priority'}
+                            {t('messagePriority')}
                           </FormLabel>
                           <Select 
                             id="message-priority"
                             value={messagePriority}
                             onChange={(e) => setMessagePriority(e.target.value)}
                           >
-                            <option value="critical">{t('critical') || 'Critical'}</option>
-                            <option value="high">{t('high') || 'High'}</option>
-                            <option value="medium">{t('medium') || 'Medium'}</option>
-                            <option value="low">{t('low') || 'Low'}</option>
+                            <option value="critical">{t('critical')}</option>
+                            <option value="high">{t('high')}</option>
+                            <option value="medium">{t('medium')}</option>
+                            <option value="low">{t('low')}</option>
                           </Select>
                         </FormControl>
                         
                         <FormControl mb={4}>
                           <FormLabel htmlFor="target-audience">
-                            {t('targetAudience') || 'Target Audience'}
+                            {t('targetAudience')}
                           </FormLabel>
                           <Select 
                             id="target-audience"
                             value={targetAudience}
                             onChange={(e) => setTargetAudience(e.target.value)}
                           >
-                            <option value="all">{t('allUsers') || 'All users'}</option>
-                            <option value="north">{t('northDistrict') || 'North District'}</option>
-                            <option value="central">{t('centralDistrict') || 'Central District'}</option>
-                            <option value="east">{t('eastDistrict') || 'East District'}</option>
-                            <option value="emergency">{t('emergencyPersonnel') || 'Emergency Personnel'}</option>
+                            <option value="all">{t('allUsers')}</option>
+                            <option value="north">{t('northDistrict')}</option>
+                            <option value="central">{t('centralDistrict')}</option>
+                            <option value="east">{t('eastDistrict')}</option>
+                            <option value="emergency">{t('emergencyPersonnel')}</option>
                           </Select>
                         </FormControl>
                       </GridItem>
@@ -321,11 +439,11 @@ const AdminDashboard = () => {
                       <GridItem>
                         <FormControl isRequired mb={4} h="100%">
                           <FormLabel htmlFor="broadcast-message">
-                            {t('messageContent') || 'Message Content'}
+                            {t('messageContent')}
                           </FormLabel>
                           <Textarea 
                             id="broadcast-message"
-                            placeholder={t('enterYourMessage') || 'Enter your message here...'}
+                            placeholder={t('enterYourMessage')}
                             value={broadcastMessage}
                             onChange={(e) => setBroadcastMessage(e.target.value)}
                             h="calc(100% - 32px)"
@@ -343,16 +461,195 @@ const AdminDashboard = () => {
                         onClick={handleBroadcast}
                         isDisabled={!broadcastMessage.trim() || !messageCategory || !messagePriority}
                       >
-                        {t('broadcast') || 'Broadcast'}
+                        {t('broadcast')}
                       </Button>
                     </Box>
+                  </VStack>
+                </TabPanel>
+
+                {/* User Messages Tab */}
+                <TabPanel>
+                  <VStack spacing={4} align="stretch">
+                    <Flex justify="space-between" align="center" mb={2}>
+                      <Heading as="h2" size="md">{t('userMessages')}</Heading>
+                      <HStack spacing={2}>
+                        <Select 
+                          size="sm" 
+                          width="auto" 
+                          placeholder={t('filterByCategory')}
+                        >
+                          <option value="all">{t('allMessages')}</option>
+                          {categories.map((category) => (
+                            <option key={category} value={category}>
+                              {t(category)}
+                            </option>
+                          ))}
+                        </Select>
+                        <Select 
+                          size="sm" 
+                          width="auto" 
+                          placeholder={t('filterByStatus')}
+                        >
+                          <option value="all">{t('allStatuses')}</option>
+                          <option value="pending">{t('requestPending')}</option>
+                          <option value="inProgress">{t('requestInProgress')}</option>
+                          <option value="resolved">{t('requestResolved')}</option>
+                        </Select>
+                      </HStack>
+                    </Flex>
+                    
+                    {userRequests.length > 0 ? (
+                      <VStack spacing={4} align="stretch">
+                        {userRequests.map((request) => (
+                          <Card key={request.id} variant="outline" borderRadius="md" bg={requestCardBg}>
+                            <CardBody p={4}>
+                              <Flex direction={{ base: "column", md: "row" }} justify="space-between">
+                                <Box flex="1" mb={{ base: 4, md: 0 }}>
+                                  <Flex mb={2} alignItems="center">
+                                    <Checkbox 
+                                      isChecked={selectedRequests.includes(request.id)}
+                                      onChange={() => handleRequestSelect(request.id)}
+                                      mr={3}
+                                    />
+                                    <Badge 
+                                      colorScheme={getPriorityColor(request.priority)} 
+                                      mr={2}
+                                    >
+                                      {t(request.priority)}
+                                    </Badge>
+                                    <Text fontWeight="bold">
+                                      {request.sender} - {request.userLocation}
+                                    </Text>
+                                  </Flex>
+                                  
+                                  <Flex mb={2} alignItems="center">
+                                    <Icon 
+                                      as={getCategoryIcon(request.category)} 
+                                      color={`${getPriorityColor(request.priority)}.500`}
+                                      mr={2}
+                                    />
+                                    <Text fontWeight="medium" color="gray.600">
+                                      {t(request.category)}
+                                    </Text>
+                                  </Flex>
+                                  
+                                  <Text mb={3}>{request.message}</Text>
+                                  
+                                  <Flex alignItems="center" fontSize="sm" color="gray.500">
+                                    <Text>{new Date(request.timestamp).toLocaleString()}</Text>
+                                    <Badge 
+                                      ml={3} 
+                                      colorScheme={getRequestStatusColor(request.status)}
+                                    >
+                                      {getRequestStatusLabel(request.status)}
+                                    </Badge>
+                                  </Flex>
+                                </Box>
+                                
+                                <Stack 
+                                  direction={{ base: "row", md: "column" }} 
+                                  spacing={2} 
+                                  align={{ base: "center", md: "flex-end" }}
+                                  ml={{ base: 0, md: 4 }}
+                                >
+                                  {request.status === 'pending' && (
+                                    <>
+                                      <Button 
+                                        size="sm" 
+                                        colorScheme="blue" 
+                                        onClick={() => handleUpdateRequestStatus(request.id, 'inProgress')}
+                                      >
+                                        {t('startProcessing')}
+                                      </Button>
+                                      <Button 
+                                        size="sm" 
+                                        colorScheme="green" 
+                                        onClick={() => handleUpdateRequestStatus(request.id, 'resolved')}
+                                      >
+                                        {t('markResolved')}
+                                      </Button>
+                                    </>
+                                  )}
+                                  
+                                  {request.status === 'inProgress' && (
+                                    <Button 
+                                      size="sm" 
+                                      colorScheme="green" 
+                                      onClick={() => handleUpdateRequestStatus(request.id, 'resolved')}
+                                    >
+                                      {t('markResolved')}
+                                    </Button>
+                                  )}
+                                  
+                                  <Button 
+                                    size="sm" 
+                                    colorScheme="purple" 
+                                    variant="outline"
+                                  >
+                                    {t('reply')}
+                                  </Button>
+                                </Stack>
+                              </Flex>
+                            </CardBody>
+                          </Card>
+                        ))}
+                      </VStack>
+                    ) : (
+                      <Box 
+                        p={6} 
+                        textAlign="center" 
+                        borderRadius="md" 
+                        borderWidth="1px"
+                        borderColor={borderColor}
+                      >
+                        <Icon as={FiMessageSquare} boxSize={10} color="gray.400" mb={3} />
+                        <Heading size="md" mb={2}>{t('noUserMessages') || 'No User Messages'}</Heading>
+                        <Text>{t('noUserMessagesDesc') || 'There are no user messages or help requests at this time.'}</Text>
+                      </Box>
+                    )}
+                    
+                    {selectedRequests.length > 0 && (
+                      <Flex justify="space-between" align="center" mt={2}>
+                        <Text>
+                          {selectedRequests.length} {selectedRequests.length === 1 
+                            ? t('itemSelected') 
+                            : t('itemsSelected')}
+                        </Text>
+                        <HStack spacing={2}>
+                          <Button 
+                            size="sm" 
+                            colorScheme="blue"
+                            onClick={() => {
+                              selectedRequests.forEach(id => 
+                                handleUpdateRequestStatus(id, 'inProgress')
+                              );
+                              setSelectedRequests([]);
+                            }}
+                          >
+                            {t('processSelected')}
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            colorScheme="green"
+                            onClick={() => {
+                              selectedRequests.forEach(id => 
+                                handleUpdateRequestStatus(id, 'resolved')
+                              );
+                              setSelectedRequests([]);
+                            }}
+                          >
+                            {t('resolveSelected')}
+                          </Button>
+                        </HStack>
+                      </Flex>
+                    )}
                   </VStack>
                 </TabPanel>
                 
                 {/* Nodes Tab */}
                 <TabPanel>
                   <VStack spacing={4} align="stretch">
-                    <Heading as="h2" size="md" mb={2}>{t('networkNodes') || 'Network Nodes'}</Heading>
+                    <Heading as="h2" size="md" mb={2}>{t('networkNodes')}</Heading>
                     
                     {mockNodes.map((node) => (
                       <Card key={node.id} variant="outline" borderRadius="md">
@@ -360,24 +657,24 @@ const AdminDashboard = () => {
                           <Flex justify="space-between" align="center">
                             <Heading size="sm">{typeof node.name === 'function' ? node.name(t) : node.name}</Heading>
                             <Badge colorScheme={getStatusColor(node.status)}>
-                              {node.status === 'online' ? t('online') || 'Online' : t('offline') || 'Offline'}
+                              {node.status === 'online' ? t('online') : t('offline')}
                             </Badge>
                           </Flex>
                         </CardHeader>
                         <CardBody p={4}>
                           <Grid templateColumns="repeat(3, 1fr)" gap={4}>
                             <Stat size="sm">
-                              <StatLabel fontSize="xs">{t('connectedUsers') || 'Connected Users'}</StatLabel>
+                              <StatLabel fontSize="xs">{t('connectedUsers')}</StatLabel>
                               <StatNumber fontSize="md">{node.users}</StatNumber>
                             </Stat>
                             <Stat size="sm">
-                              <StatLabel fontSize="xs">{t('batteryLevel') || 'Battery Level'}</StatLabel>
+                              <StatLabel fontSize="xs">{t('batteryLevel')}</StatLabel>
                               <StatNumber fontSize="md">{node.battery}%</StatNumber>
                             </Stat>
                             <Stat size="sm">
-                              <StatLabel fontSize="xs">{t('signalStrength') || 'Signal Strength'}</StatLabel>
+                              <StatLabel fontSize="xs">{t('signalStrength')}</StatLabel>
                               <Badge colorScheme={getSignalColor(node.signal)}>
-                                {t(node.signal) || node.signal}
+                                {t(node.signal)}
                               </Badge>
                             </Stat>
                           </Grid>
@@ -391,13 +688,13 @@ const AdminDashboard = () => {
                 <TabPanel>
                   <VStack spacing={4} align="stretch">
                     <Flex justify="space-between" align="center" mb={2}>
-                      <Heading as="h2" size="md">{t('messageTemplates') || 'Message Templates'}</Heading>
+                      <Heading as="h2" size="md">{t('messageTemplates')}</Heading>
                       <Button 
                         size="sm" 
                         colorScheme="purple" 
                         leftIcon={<Icon as={FiPlus} />}
                       >
-                        {t('addTemplate') || 'Add Template'}
+                        {t('addTemplate')}
                       </Button>
                     </Flex>
                     
@@ -413,14 +710,14 @@ const AdminDashboard = () => {
                               {t(template.priority)}
                             </Badge>
                             <Text fontSize="sm">
-                              {t('usedTimes', { count: template.usageCount }) || `Used ${template.usageCount} times`}
+                              {t('usedTimes', { count: template.usageCount })}
                             </Text>
                             <HStack spacing={2}>
                               <Button size="sm" colorScheme="blue" variant="outline">
-                                {t('edit') || 'Edit'}
+                                {t('edit')}
                               </Button>
                               <Button size="sm" colorScheme="red" variant="ghost">
-                                {t('delete') || 'Delete'}
+                                {t('delete')}
                               </Button>
                             </HStack>
                           </Grid>
@@ -433,7 +730,7 @@ const AdminDashboard = () => {
                 {/* System Logs Tab */}
                 <TabPanel>
                   <VStack spacing={4} align="stretch">
-                    <Heading as="h2" size="md" mb={2}>{t('systemLogs') || 'System Logs'}</Heading>
+                    <Heading as="h2" size="md" mb={2}>{t('systemLogs')}</Heading>
                     
                     <Box 
                       p={4} 

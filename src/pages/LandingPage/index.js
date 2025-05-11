@@ -11,7 +11,9 @@ import {
   SimpleGrid,
   Icon,
   Badge,
-  HStack
+  HStack,
+  Image,
+  Link
 } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
 import { FiUsers, FiShield, FiRadio, FiInfo, FiAlertTriangle, FiArrowRight } from 'react-icons/fi';
@@ -45,21 +47,113 @@ const LandingPage = () => {
       
       {/* Main content */}
       <Container maxW="container.xl" py={6} px={4}>
-        {/* Hero section */}
-        <VStack spacing={8} textAlign="center" mb={10}>
-          <Heading as="h2" size={{ base: "xl", md: "2xl" }}>
-            {t('landingHeroTitle') || 'Emergency Mesh Communication'}
-          </Heading>
-          <Text fontSize={{ base: "md", md: "lg" }} maxW="800px">
-            {t('landingHeroDescription') || 'A reliable, multilingual, and fully accessible communication platform for emergencies, disasters, and critical situations.'}
-          </Text>
+        {/* Hero section with image on right and text on left (desktop) */}
+        <Flex 
+          direction={{ base: "column", lg: "row" }} 
+          mb={10} 
+          borderRadius="xl" 
+          overflow="hidden" 
+          boxShadow="xl"
+          bg={cardBgColor}
+        >
+          {/* Left side - Text content */}
+          <Flex 
+            direction="column" 
+            justify="center"
+            p={{ base: 6, md: 10 }} 
+            flex={{ lg: 1 }}
+            zIndex={2}
+          >
+            <Heading 
+              as="h2" 
+              size={{ base: "xl", md: "2xl" }} 
+              mb={3}
+              color={useColorModeValue("gray.800", "white")}
+            >
+              {t('landingHeroTitle') || 'Emergency Mesh Communication'}
+            </Heading>
+            <Text 
+              fontSize={{ base: "md", md: "lg" }} 
+              mb={6}
+              color={useColorModeValue("gray.600", "gray.300")}
+            >
+              {t('landingHeroDescription') || 'A reliable, multilingual, and fully accessible communication platform for emergencies, disasters, and critical situations.'}
+            </Text>
+            
+            {/* CTA Button */}
+            <Button
+              as={RouterLink}
+              to="/user"
+              size="lg"
+              colorScheme="blue"
+              width="100%"
+              height="60px"
+              px={6}
+              fontSize="lg"
+              fontWeight="bold"
+              mb={4}
+              borderRadius="md"
+              boxShadow="md"
+              _hover={{
+                transform: 'translateY(-2px)',
+                boxShadow: 'lg',
+              }}
+              _active={{
+                transform: 'translateY(0)',
+              }}
+              transition="all 0.2s"
+            >
+              <HStack w="100%" justifyContent="space-between">
+                <Flex align="center">
+                  <Icon as={FiUsers} boxSize={5} mr={3} />
+                  <Text>{t('enterUserApp')}</Text>
+                </Flex>
+                <Icon as={FiArrowRight} boxSize={5} />
+              </HStack>
+            </Button>
+            
+            {/* Secondary CTA for Admin */}
+            <Flex 
+              as={RouterLink}
+              to="/admin"
+              align="center"
+              color="purple.500"
+              fontWeight="medium"
+              _hover={{
+                textDecoration: 'none',
+                color: 'purple.600',
+              }}
+            >
+              <Icon as={FiShield} boxSize={4} mr={2} />
+              <Text>{t('enterAdminPanel')}</Text>
+              <Icon as={FiArrowRight} boxSize={4} ml={2} />
+            </Flex>
+          </Flex>
           
+          {/* Right side - Image (stacked on mobile, side-by-side on desktop) */}
+          <Box 
+            flex={{ lg: 1 }}
+            h={{ base: "250px", md: "300px", lg: "auto" }}
+            position="relative"
+          >
+            <Image 
+              src="/landing-img.png"
+              alt={t('heroImageAlt') || 'People connected in a communication network'}
+              objectFit="cover"
+              w="100%"
+              h="100%"
+            />
+          </Box>
+        </Flex>
+
+        {/* VStack for the rest of the content */}
+        <VStack spacing={8} textAlign="center" mb={10}>
           {/* Enhanced Emergency status alert */}
           <Box 
             w="full" 
             bg="red.600" 
             color="white" 
-            p={5}
+            p={{ base: 3, md: 5 }}
             borderRadius="lg"
             boxShadow="0 4px 8px rgba(255, 0, 0, 0.2)"
             position="relative"
@@ -74,15 +168,30 @@ const LandingPage = () => {
               background: 'rgba(255, 255, 255, 0.5)',
             }}
           >
-            <HStack spacing={4} align="flex-start">
-              <Icon as={FiAlertTriangle} boxSize={10} color="white" />
-              <Box>
-                <HStack mb={1}>
+            <Flex 
+              direction={{ base: "column", sm: "row" }} 
+              spacing={{ base: 2, sm: 4 }} 
+              align={{ base: "center", sm: "flex-start" }}
+            >
+              <Icon 
+                as={FiAlertTriangle} 
+                boxSize={{ base: 8, md: 10 }} 
+                color="white" 
+                mr={{ base: 0, sm: 4 }}
+                mb={{ base: 2, sm: 0 }}
+              />
+              <Box textAlign={{ base: "center", sm: "left" }}>
+                <Flex 
+                  direction={{ base: "column", sm: "row" }} 
+                  mb={1} 
+                  gap={2} 
+                  align={{ base: "center", sm: "flex-start" }}
+                >
                   <Badge 
                     colorScheme="red" 
                     bg="white" 
                     color="red.600" 
-                    fontSize="sm" 
+                    fontSize={{ base: "xs", md: "sm" }} 
                     fontWeight="bold"
                     px={2}
                     py={1}
@@ -100,79 +209,53 @@ const LandingPage = () => {
                   >
                     {new Date().toLocaleDateString()}
                   </Badge>
-                </HStack>
-                <Text fontWeight="bold" fontSize="lg" mb={1}>
+                </Flex>
+                <Text 
+                  fontWeight="bold" 
+                  fontSize={{ base: "md", md: "lg" }} 
+                  mb={1}
+                  lineHeight="1.4"
+                >
                   {t('checkUserAppForDetails') || 'Check the user application for latest updates and instructions.'}
                 </Text>
-                <Text fontSize="sm">
+                <Text 
+                  fontSize={{ base: "xs", md: "sm" }}
+                  lineHeight="1.4"
+                >
                   {t('emergencyInstructions') || 'Follow official instructions and keep your device charged. Emergency services are responding.'}
                 </Text>
               </Box>
-            </HStack>
+            </Flex>
           </Box>
           
-          {/* Enhanced Main action buttons */}
-          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} w="full" maxW="2xl">
-            <Button 
-              as={RouterLink} 
-              to="/user" 
-              size="lg" 
+          {/* Additional CTA above Key Features */}
+          <Box w="full" maxW="md" mx="auto" my={6}>
+            <Button
+              as={RouterLink}
+              to="/user"
+              size="lg"
               colorScheme="blue"
-              height="70px"
               width="100%"
+              height="60px"
               px={6}
-              fontSize="md"
-              borderRadius="xl"
-              boxShadow="lg"
+              fontSize="lg"
+              fontWeight="bold"
+              borderRadius="md"
+              boxShadow="md"
+              leftIcon={<Icon as={FiUsers} boxSize={5} />}
+              rightIcon={<Icon as={FiArrowRight} boxSize={5} />}
               _hover={{
                 transform: 'translateY(-2px)',
-                boxShadow: 'xl',
+                boxShadow: 'lg',
               }}
               _active={{
                 transform: 'translateY(0)',
-                boxShadow: 'md',
               }}
               transition="all 0.2s"
             >
-              <HStack w="100%" justifyContent="space-between">
-                <Flex align="center">
-                  <Icon as={FiUsers} boxSize={6} mr={3} />
-                  <Text fontWeight="bold">{t('enterUserApp') || 'Enter User App'}</Text>
-                </Flex>
-                <Icon as={FiArrowRight} boxSize={5} />
-              </HStack>
+              {t('enterUserApp')}
             </Button>
-            
-            <Button 
-              as={RouterLink} 
-              to="/admin" 
-              size="lg" 
-              colorScheme="purple"
-              height="70px"
-              width="100%"
-              px={6}
-              fontSize="md"
-              borderRadius="xl"
-              boxShadow="lg"
-              _hover={{
-                transform: 'translateY(-2px)',
-                boxShadow: 'xl',
-              }}
-              _active={{
-                transform: 'translateY(0)',
-                boxShadow: 'md',
-              }}
-              transition="all 0.2s"
-            >
-              <HStack w="100%" justifyContent="space-between">
-                <Flex align="center">
-                  <Icon as={FiShield} boxSize={6} mr={3} />
-                  <Text fontWeight="bold">{t('enterAdminPanel') || 'Enter Admin Panel'}</Text>
-                </Flex>
-                <Icon as={FiArrowRight} boxSize={5} />
-              </HStack>
-            </Button>
-          </SimpleGrid>
+          </Box>
         </VStack>
         
         {/* Key features */}
