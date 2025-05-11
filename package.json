@@ -13,6 +13,7 @@
 		"@meshtastic/transport-http": "npm:@jsr/meshtastic__transport-http@^0.2.1",
 		"@meshtastic/transport-web-bluetooth": "npm:@jsr/meshtastic__transport-web-bluetooth@^0.1.1",
 		"@meshtastic/transport-web-serial": "npm:@jsr/meshtastic__transport-web-serial@^0.2.1",
+		"better-sqlite3": "^11.10.0",
 		"date-fns": "^2.30.0",
 		"framer-motion": "^10.16.4",
 		"next-themes": "^0.4.6",
@@ -35,7 +36,8 @@
 		"docker:start": "docker compose up -d && npm run open",
 		"open": "npx open-cli http://localhost:3000",
 		"docker:multi-node": "docker compose -f docker-compose.multi-node.yaml up -d",
-		"docker:multi-node:down": "docker compose -f docker-compose.multi-node.yaml down"
+		"docker:multi-node:down": "docker compose -f docker-compose.multi-node.yaml down",
+		"init-db": "node scripts/init-db.js"
 	},
 	"eslintConfig": {
 		"extends": [

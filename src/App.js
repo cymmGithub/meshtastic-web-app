@@ -5,7 +5,6 @@ import { LanguageProvider } from './i18n/LanguageContext.js';
 import theme from './theme.js';
 import './styles.css';
 
-// Import pages
 import LandingPage from './pages/LandingPage/index.js';
 import UserDashboard from './pages/UserDashboard/index.js';
 import AdminDashboard from './pages/AdminDashboard/index.js';

@@ -66,7 +66,7 @@ import LanguageSelector from '../../components/ui/LanguageSelector.js';
 import ThemeToggle from '../../components/ui/ThemeToggle.js';
 import { SkipLink } from '../../components/accessibility/index.js';
 import { categories } from '../../utils/templateData.js';
-import { mockMessages } from '../../utils/mockMessages.js';
+import { messages } from '../../db/messages.js';
 
 // Mock data for testing
 const mockNodes = [
@@ -197,7 +197,7 @@ const AdminDashboard = () => {
   };
   
   // Form handlers
-  const handleBroadcast = () => {
+  const handleBroadcast = async () => {
     if (!broadcastMessage.trim() || !messageCategory || !messagePriority) {
       toast({
         title: t('formIncomplete') || 'Form Incomplete',
@@ -209,19 +209,37 @@ const AdminDashboard = () => {
       return;
     }
     
-    toast({
-      title: t('messageBroadcasted') || 'Message Broadcasted',
-      description: t('messageHasBeenSent') || 'Your message has been sent to all recipients',
-      status: 'success',
-      duration: 5000,
-      isClosable: true,
-    });
-    
-    // Reset form
-    setBroadcastMessage('');
-    setMessageCategory('');
-    setMessagePriority('medium');
-    setTargetAudience('all');
+    try {
+      // Zapisz wiadomość w bazie danych
+      await messages.save(
+        'admin', // senderId
+        targetAudience, // receiverId
+        broadcastMessage // content
+      );
+      
+      toast({
+        title: t('messageBroadcasted') || 'Message Broadcasted',
+        description: t('messageHasBeenSent') || 'Your message has been sent to all recipients',
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+      
+      // Reset form
+      setBroadcastMessage('');
+      setMessageCategory('');
+      setMessagePriority('medium');
+      setTargetAudience('all');
+    } catch (error) {
+      console.error('Error saving message:', error);
+      toast({
+        title: t('error') || 'Error',
+        description: t('errorSavingMessage') || 'Error saving message to database',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
   };
 
   // Handle user request selection
