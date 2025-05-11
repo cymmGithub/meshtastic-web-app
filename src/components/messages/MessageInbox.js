@@ -16,73 +16,70 @@ import {
 } from '@chakra-ui/react';
 import { FiMoreHorizontal } from 'react-icons/fi';
 import { useLanguage } from '../../i18n/LanguageContext.js';
-import { mockMessages } from '../../utils/mockMessages.js';
+import { messages } from '../../db/messages.js';
 import MessageItem from './MessageItem.js';
 import MessageFilter from './MessageFilter.js';
 
-const MessageInbox = () => {
+const MessageInbox = ({ userId }) => {
   const { t } = useLanguage();
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
-  const [messages, setMessages] = useState(mockMessages);
+  const [messageList, setMessageList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // Color mode values - defined at the component level, not inside conditionals or callbacks
+  // Color mode values
   const boxBgColor = useColorModeValue('gray.50', 'gray.800');
   const cardBgColor = useColorModeValue('white', 'gray.700');
   const cardBorderColor = useColorModeValue('gray.200', 'gray.600');
   
-  // Simulating data loading
   useEffect(() => {
-    // In a real app, this would be an API call to fetch messages
-    const fetchData = async () => {
+    const fetchMessages = async () => {
       try {
-        // Simulating network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setMessages(mockMessages);
-        setLoading(false);
+        setLoading(true);
+        const fetchedMessages = await messages.getAll();
+        setMessageList(fetchedMessages);
+        setError(null);
       } catch (err) {
-        setError('Error loading messages');
+        console.error('Error fetching messages:', err);
+        setError(t('errorFetchingMessages') || 'Error fetching messages');
+      } finally {
         setLoading(false);
       }
     };
     
-    fetchData();
-  }, []);
+    fetchMessages();
+  }, [t]);
   
   // Handle message acknowledgment
-  const handleAcknowledge = (messageId) => {
-    setMessages(prevMessages => 
-      prevMessages.map(msg => 
-        msg.id === messageId ? { ...msg, acknowledged: true } : msg
-      )
-    );
+  const handleAcknowledge = async (messageId) => {
+    try {
+      await messages.markAsRead(messageId);
+      setMessageList(prevMessages => 
+        prevMessages.map(msg => 
+          msg.id === messageId ? { ...msg, is_read: true } : msg
+        )
+      );
+    } catch (err) {
+      console.error('Error marking message as read:', err);
+      setError(t('errorMarkingMessageAsRead') || 'Error marking message as read');
+    }
   };
   
   // Filter messages based on selected filters
-  const filteredMessages = messages.filter(msg => {
+  const filteredMessages = messageList.filter(msg => {
     const matchesCategory = categoryFilter === 'all' || msg.category === categoryFilter;
     const matchesPriority = priorityFilter === 'all' || msg.priority === priorityFilter;
     return matchesCategory && matchesPriority;
   });
   
-  // Sort messages by priority and timestamp
-  const sortedMessages = [...filteredMessages].sort((a, b) => {
-    // First by priority level
-    const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
-    const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
-    
-    if (priorityDiff !== 0) return priorityDiff;
-    
-    // Then by timestamp (newest first)
-    return new Date(b.timestamp) - new Date(a.timestamp);
-  });
-  
-  // Get critical unacknowledged messages for the alert
-  const criticalUnacknowledged = messages.filter(
-    msg => msg.priority === 'critical' && msg.requiresAcknowledgment && !msg.acknowledged
+  // Sort messages by timestamp (newest first)
+  const sortedMessages = [...filteredMessages].sort((a, b) => 
+    new Date(b.timestamp) - new Date(a.timestamp)
   );
+  
+  // Get unread messages for the alert
+  const unreadMessages = messageList.filter(msg => !msg.is_read);
   
   return (
     <Container maxW="container.lg" px={{ base: 2, md: 4 }}>
@@ -91,10 +88,10 @@ const MessageInbox = () => {
           {t('messagesInbox')}
         </Heading>
         
-        {/* Critical messages alert */}
-        {criticalUnacknowledged.length > 0 && (
+        {/* Unread messages alert */}
+        {unreadMessages.length > 0 && (
           <Alert 
-            status="error" 
+            status="info" 
             variant="solid" 
             borderRadius="md" 
             mb={4}
@@ -102,7 +99,7 @@ const MessageInbox = () => {
             alignItems={{ base: "flex-start", sm: "center" }}
           >
             <AlertIcon boxSize={5} />
-            <AlertTitle mr={2}>{criticalUnacknowledged.length} {t('critical')} {criticalUnacknowledged.length === 1 ? t('message') : t('messages')}</AlertTitle>
+            <AlertTitle mr={2}>{unreadMessages.length} {unreadMessages.length === 1 ? t('unreadMessage') : t('unreadMessages')}</AlertTitle>
             <AlertDescription>
               {t('requiresYourAttention')}
             </AlertDescription>

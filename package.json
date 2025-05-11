@@ -14,7 +14,9 @@
 		"@meshtastic/transport-web-bluetooth": "npm:@jsr/meshtastic__transport-web-bluetooth@^0.1.1",
 		"@meshtastic/transport-web-serial": "npm:@jsr/meshtastic__transport-web-serial@^0.2.1",
 		"better-sqlite3": "^11.10.0",
+		"cors": "^2.8.5",
 		"date-fns": "^2.30.0",
+		"express": "^4.18.2",
 		"framer-motion": "^10.16.4",
 		"next-themes": "^0.4.6",
 		"react": "^18.2.0",
@@ -29,6 +31,8 @@
 		"build": "react-scripts build",
 		"test": "react-scripts test",
 		"eject": "react-scripts eject",
+		"server": "node server/index.js",
+		"dev": "concurrently \"npm run server\" \"npm run start\"",
 		"docker:up": "docker compose up -d",
 		"docker:down": "docker compose down",
 		"docker:logs": "docker compose logs -f",
@@ -36,8 +40,7 @@
 		"docker:start": "docker compose up -d && npm run open",
 		"open": "npx open-cli http://localhost:3000",
 		"docker:multi-node": "docker compose -f docker-compose.multi-node.yaml up -d",
-		"docker:multi-node:down": "docker compose -f docker-compose.multi-node.yaml down",
-		"init-db": "node scripts/init-db.js"
+		"docker:multi-node:down": "docker compose -f docker-compose.multi-node.yaml down"
 	},
 	"eslintConfig": {
 		"extends": [
@@ -56,5 +59,8 @@
 			"last 1 firefox version",
 			"last 1 safari version"
 		]
+	},
+	"devDependencies": {
+		"concurrently": "^8.2.2"
 	}
 }

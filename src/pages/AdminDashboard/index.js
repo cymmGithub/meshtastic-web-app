@@ -16,7 +16,6 @@ import {
   Icon,
   FormControl,
   FormLabel,
-  Input,
   Textarea,
   Select,
   VStack,
@@ -24,7 +23,6 @@ import {
   Badge,
   HStack,
   useToast,
-  Divider,
   Card,
   CardHeader,
   CardBody,
@@ -52,14 +50,12 @@ import {
   FiSend, 
   FiRadio,
   FiUsers,
-  FiPackage,
   FiAlertTriangle,
   FiList,
   FiActivity,
   FiDatabase,
   FiPlus,
   FiMessageSquare,
-  FiCheckCircle
 } from 'react-icons/fi';
 import { useLanguage } from '../../i18n/LanguageContext.js';
 import LanguageSelector from '../../components/ui/LanguageSelector.js';
@@ -210,11 +206,10 @@ const AdminDashboard = () => {
     }
     
     try {
-      // Zapisz wiadomość w bazie danych
       await messages.save(
-        'admin', // senderId
-        targetAudience, // receiverId
-        broadcastMessage // content
+        'admin',
+        targetAudience,
+        broadcastMessage
       );
       
       toast({

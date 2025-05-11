@@ -73,6 +73,7 @@ const MessageHistory = ({ messages }) => {
             _hover={{ bg: boxHoverBgColor }}
             transition="background 0.2s"
           >
+            asdfasdf
             <Text mb={2} fontWeight="medium">
               {message.text}
             </Text>
