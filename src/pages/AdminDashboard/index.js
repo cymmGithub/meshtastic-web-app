@@ -58,7 +58,7 @@ import { categories } from '../../utils/templateData.js';
 // Mock data for testing
 const mockNodes = [
   { id: 'node-1', name: t => t('northDistrict') || 'North District Hub', status: 'online', users: 24, battery: 86, signal: 'good' },
-  { id: 'node-2', name: t => t('centralDistrict') || 'Central Square', status: 'online', users: 18, battery: 52, signal: 'medium' },
+  { id: 'node-2', name: t => t('centralDistrict') || 'Central Square', status: 'online', users: 18, battery: 52, signal: 'signalMedium' },
   { id: 'node-3', name: t => t('eastDistrict') || 'East Hospital', status: 'offline', users: 0, battery: 23, signal: 'poor' },
   { id: 'node-4', name: t => t('schoolZone') || 'School Zone', status: 'online', users: 12, battery: 78, signal: 'good' }
 ];
@@ -134,7 +134,7 @@ const AdminDashboard = () => {
   const getSignalColor = (signal) => {
     switch(signal) {
       case 'good': return 'green';
-      case 'medium': return 'yellow';
+      case 'signalMedium': return 'yellow';
       case 'poor': return 'red';
       default: return 'gray';
     }

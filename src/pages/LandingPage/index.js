@@ -11,8 +11,7 @@ import {
   SimpleGrid,
   Icon,
   Badge,
-  HStack,
-  Spacer
+  HStack
 } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
 import { FiUsers, FiShield, FiRadio, FiInfo, FiAlertTriangle, FiArrowRight } from 'react-icons/fi';

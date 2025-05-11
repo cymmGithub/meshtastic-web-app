@@ -117,7 +117,7 @@ export const translations = {
     batteryLevel: 'Battery Level',
     signalStrength: 'Signal Strength',
     good: 'Good',
-    medium: 'Medium',
+    signalMedium: 'Medium',
     poor: 'Poor',
     addTemplate: 'Add Template',
     category: 'Category',
@@ -128,7 +128,14 @@ export const translations = {
     evacuationAlert: 'Evacuation Alert',
     medicalAidAvailable: 'Medical Aid Available',
     powerOutageUpdate: 'Power Outage Update',
-    foodDistribution: 'Food Distribution'
+    foodDistribution: 'Food Distribution',
+    templatesAvailable: 'templates available',
+    back: 'Back',
+    urgentHelpDesc: 'Request immediate assistance in emergency situations',
+    medicalEmergencyDesc: 'Medical assistance needed or available',
+    evacuationDesc: 'Information about evacuation routes and procedures',
+    resourcesDesc: 'Information about available resources and supplies',
+    infrastructureDesc: 'Updates about infrastructure status'
   },
   pl: {
     appTitle: 'Awaryjna Komunikacja Mesh',
@@ -248,7 +255,7 @@ export const translations = {
     batteryLevel: 'Poziom baterii',
     signalStrength: 'Siła sygnału',
     good: 'Dobra',
-    medium: 'Średnia',
+    signalMedium: 'Średnia',
     poor: 'Słaba',
     addTemplate: 'Dodaj szablon',
     category: 'Kategoria',
@@ -259,7 +266,14 @@ export const translations = {
     evacuationAlert: 'Alert Ewakuacyjny',
     medicalAidAvailable: 'Dostępna Pomoc Medyczna',
     powerOutageUpdate: 'Aktualizacja o Braku Prądu',
-    foodDistribution: 'Dystrybucja Żywności'
+    foodDistribution: 'Dystrybucja Żywności',
+    templatesAvailable: 'dostępnych szablonów',
+    back: 'Wstecz',
+    urgentHelpDesc: 'Prośba o natychmiastową pomoc w sytuacjach awaryjnych',
+    medicalEmergencyDesc: 'Potrzebna lub dostępna pomoc medyczna',
+    evacuationDesc: 'Informacje o trasach i procedurach ewakuacji',
+    resourcesDesc: 'Informacje o dostępnych zasobach i zapasach',
+    infrastructureDesc: 'Aktualizacje dotyczące stanu infrastruktury'
   },
   ua: {
     appTitle: 'Екстрена комунікація Mesh',
@@ -333,7 +347,14 @@ export const translations = {
     medicalAidAvailable: 'Доступна Медична Допомога',
     powerOutageUpdate: 'Оновлення про Відключення Електроенергії',
     foodDistribution: 'Розподіл Продуктів Харчування',
-    schoolZone: 'Шкільна зона'
+    schoolZone: 'Шкільна зона',
+    templatesAvailable: 'доступних шаблонів',
+    back: 'Назад',
+    urgentHelpDesc: 'Запит на негайну допомогу в надзвичайних ситуаціях',
+    medicalEmergencyDesc: 'Потрібна або доступна медична допомога',
+    evacuationDesc: 'Інформація про маршрути та процедури евакуації',
+    resourcesDesc: 'Інформація про доступні ресурси та запаси',
+    infrastructureDesc: 'Оновлення щодо стану інфраструктури'
   },
   ru: {
     appTitle: 'Аварийная связь Mesh',
@@ -407,6 +428,13 @@ export const translations = {
     medicalAidAvailable: 'Доступна Медицинская Помощь',
     powerOutageUpdate: 'Обновление о Перебоях Электричества',
     foodDistribution: 'Распределение Продуктов Питания',
-    schoolZone: 'Школьная зона'
+    schoolZone: 'Школьная зона',
+    templatesAvailable: 'доступных шаблонов',
+    back: 'Назад',
+    urgentHelpDesc: 'Запрос на немедленную помощь в чрезвычайных ситуациях',
+    medicalEmergencyDesc: 'Требуется или доступна медицинская помощь',
+    evacuationDesc: 'Информация о маршрутах и процедурах эвакуации',
+    resourcesDesc: 'Информация о доступных ресурсах и запасах',
+    infrastructureDesc: 'Обновления о состоянии инфраструктуры'
   }
 } 
