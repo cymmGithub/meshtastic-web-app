@@ -23,6 +23,7 @@ db.exec(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     sender_id TEXT NOT NULL,
     receiver_id TEXT NOT NULL,
+    title TEXT NOT NULL,
     content TEXT NOT NULL,
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     is_read BOOLEAN DEFAULT 0
@@ -32,26 +33,27 @@ db.exec(`
 // Endpointy API
 app.post("/api/messages", (req, res) => {
    try {
-      const { senderId, receiverId, content } = req.body;
+      const { senderId, receiverId, title, content } = req.body;
 
       // Walidacja danych wejściowych
-      if (!senderId || !receiverId || !content) {
+      if (!senderId || !receiverId || !title || !content) {
          return res.status(400).json({
             error: "Missing required fields",
             details: {
                senderId: !senderId ? "Sender ID is required" : null,
                receiverId: !receiverId ? "Receiver ID is required" : null,
+               title: !title ? "Title is required" : null,
                content: !content ? "Message content is required" : null,
             },
          });
       }
 
       const stmt = db.prepare(`
-      INSERT INTO messages (sender_id, receiver_id, content)
-      VALUES (?, ?, ?)
+      INSERT INTO messages (sender_id, receiver_id, title, content)
+      VALUES (?, ?, ?, ?)
     `);
 
-      const result = stmt.run(senderId, receiverId, content);
+      const result = stmt.run(senderId, receiverId, title, content);
       res.json({ id: result.lastInsertRowid });
    } catch (error) {
       console.error("Error saving message:", error);
@@ -66,6 +68,7 @@ app.get("/api/messages", (req, res) => {
             id,
             sender_id as senderId,
             receiver_id as receiverId,
+            title,
             content,
             timestamp,
             is_read as isRead

@@ -3,13 +3,13 @@ import fetch from 'node-fetch';
 const API_URL = 'http://localhost:3001/api';
 
 export const messages = {
-  async save(senderId, receiverId, content) {
+  async save(senderId, receiverId, title, content) {
     const response = await fetch(`${API_URL}/messages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ senderId, receiverId, content }),
+      body: JSON.stringify({ senderId, receiverId, title, content }),
     });
 
     if (!response.ok) {

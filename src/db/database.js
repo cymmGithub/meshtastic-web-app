@@ -11,6 +11,7 @@ db.pragma('foreign_keys = ON');
 db.exec(`
   CREATE TABLE IF NOT EXISTS messages (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
     content TEXT NOT NULL,
     category TEXT,
     priority TEXT,

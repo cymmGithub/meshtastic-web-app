@@ -47,6 +47,13 @@ export default {
   clearFilters: "Clear filters",
   expandMessage: "Expand message",
   collapseMessage: "Collapse message",
+  messageTitle: "Message Title",
+  enterMessageTitle: "Enter message title",
+  unreadMessages: "Unread messages",
+  unreadMessage: "Unread message",
+  noMessages: "No messages found",
+  tryDifferentFilters: "Try different filters",
+  clearFilters: "Clear filters",
   
   // Templates
   selectCategory: "Select a category",
