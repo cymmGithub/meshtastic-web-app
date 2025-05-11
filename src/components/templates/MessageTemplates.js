@@ -11,8 +11,8 @@ import {
   Icon
 } from '@chakra-ui/react';
 import { FiMessageSquare, FiChevronRight } from 'react-icons/fi';
-import { useLanguage } from '../../i18n/LanguageContext';
-import { getCategoryTemplates, categories } from '../../utils/templateData';
+import { useLanguage } from '../../i18n/LanguageContext.js';
+import { getCategoryTemplates, categories } from '../../utils/templateData.js';
 
 const MessageTemplates = ({ onSelectTemplate }) => {
   const { language, t } = useLanguage();

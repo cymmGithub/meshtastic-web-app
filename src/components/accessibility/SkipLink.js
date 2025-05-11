@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box } from '@chakra-ui/react';
-import { useLanguage } from '../../i18n/LanguageContext';
+import { useLanguage } from '../../i18n/LanguageContext.js';
 
 /**
  * SkipLink component for keyboard accessibility

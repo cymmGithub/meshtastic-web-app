@@ -11,7 +11,7 @@ import {
   VisuallyHidden
 } from '@chakra-ui/react';
 import { FiFilter } from 'react-icons/fi';
-import { useLanguage } from '../../i18n/LanguageContext';
+import { useLanguage } from '../../i18n/LanguageContext.js';
 
 const MessageFilter = ({ 
   categoryFilter, 

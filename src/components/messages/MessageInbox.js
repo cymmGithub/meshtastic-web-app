@@ -15,10 +15,10 @@ import {
   Container
 } from '@chakra-ui/react';
 import { FiMoreHorizontal } from 'react-icons/fi';
-import { useLanguage } from '../../i18n/LanguageContext';
-import { mockMessages } from '../../utils/mockMessages';
-import MessageItem from './MessageItem';
-import MessageFilter from './MessageFilter';
+import { useLanguage } from '../../i18n/LanguageContext.js';
+import { mockMessages } from '../../utils/mockMessages.js';
+import MessageItem from './MessageItem.js';
+import MessageFilter from './MessageFilter.js';
 
 const MessageInbox = () => {
   const { t } = useLanguage();

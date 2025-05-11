@@ -7,7 +7,7 @@ import {
   useColorModeValue,
   Box
 } from '@chakra-ui/react';
-import { useLanguage } from '../../i18n/LanguageContext';
+import { useLanguage } from '../../i18n/LanguageContext.js';
 
 const LanguageSelector = () => {
   const { language, setLanguage, t } = useLanguage();

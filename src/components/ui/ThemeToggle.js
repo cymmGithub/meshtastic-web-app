@@ -9,7 +9,7 @@ import {
   Tooltip,
   Icon
 } from '@chakra-ui/react';
-import { useLanguage } from '../../i18n/LanguageContext';
+import { useLanguage } from '../../i18n/LanguageContext.js';
 import { FiSun, FiMoon, FiMonitor } from 'react-icons/fi';
 
 const ThemeToggle = () => {

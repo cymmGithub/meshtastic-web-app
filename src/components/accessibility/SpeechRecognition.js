@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, useToast, Icon } from '@chakra-ui/react';
 import { FiMic, FiMicOff } from 'react-icons/fi';
-import { useLanguage } from '../../i18n/LanguageContext';
+import { useLanguage } from '../../i18n/LanguageContext.js';
 
 /**
  * SpeechRecognition component for accessibility

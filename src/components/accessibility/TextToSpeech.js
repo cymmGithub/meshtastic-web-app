@@ -1,7 +1,7 @@
 import React from 'react';
 import { IconButton, Tooltip, useToast } from '@chakra-ui/react';
 import { FiVolume2 } from 'react-icons/fi';
-import { useLanguage } from '../../i18n/LanguageContext';
+import { useLanguage } from '../../i18n/LanguageContext.js';
 
 /**
  * TextToSpeech component for accessibility

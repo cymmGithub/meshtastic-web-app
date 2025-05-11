@@ -17,7 +17,7 @@ import {
   Icon
 } from '@chakra-ui/react';
 import { FiWifi, FiWifiOff, FiAlertCircle } from 'react-icons/fi';
-import { useLanguage } from '../../i18n/LanguageContext';
+import { useLanguage } from '../../i18n/LanguageContext.js';
 
 const DeviceConnection = ({ 
   deviceAddress, 

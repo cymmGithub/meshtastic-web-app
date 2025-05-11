@@ -11,16 +11,16 @@ import {
 } from '@chakra-ui/react';
 import { MeshDevice } from "@meshtastic/core";
 import { TransportHTTP } from "@meshtastic/transport-http";
-import { useLanguage } from './i18n/LanguageContext';
-import LanguageSelector from './components/ui/LanguageSelector';
-import ThemeToggle from './components/ui/ThemeToggle';
-import DeviceConnection from './components/ui/DeviceConnection';
-import MessageTemplates from './components/templates/MessageTemplates';
-import MessageInput from './components/ui/MessageInput';
-import MessageHistory from './components/ui/MessageHistory';
-import { MessageInbox } from './components/messages';
+import { useLanguage } from './i18n/LanguageContext.js';
+import LanguageSelector from './components/ui/LanguageSelector.js';
+import ThemeToggle from './components/ui/ThemeToggle.js';
+import DeviceConnection from './components/ui/DeviceConnection.js';
+import MessageTemplates from './components/templates/MessageTemplates.js';
+import MessageInput from './components/ui/MessageInput.js';
+import MessageHistory from './components/ui/MessageHistory.js';
+import { MessageInbox } from './components/messages/index.js';
 import './styles.css';
-import { SkipLink } from './components/accessibility';
+import { SkipLink } from './components/accessibility/index.js';
 
 function App() {
   const { t } = useLanguage();

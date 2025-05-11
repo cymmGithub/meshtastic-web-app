@@ -10,7 +10,7 @@ import {
   Icon
 } from '@chakra-ui/react';
 import { FiCheckCircle, FiClock, FiAlertTriangle } from 'react-icons/fi';
-import { useLanguage } from '../../i18n/LanguageContext';
+import { useLanguage } from '../../i18n/LanguageContext.js';
 
 const MessageHistory = ({ messages }) => {
   const { t } = useLanguage();

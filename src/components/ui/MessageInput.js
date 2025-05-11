@@ -7,8 +7,8 @@ import {
   HStack, 
   useColorModeValue,
 } from '@chakra-ui/react';
-import { useLanguage } from '../../i18n/LanguageContext';
-import { SpeechRecognition } from '../accessibility';
+import { useLanguage } from '../../i18n/LanguageContext.js';
+import { SpeechRecognition } from '../accessibility/index.js';
 
 const MessageInput = ({ initialValue = '', onSendMessage }) => {
   const { t } = useLanguage();

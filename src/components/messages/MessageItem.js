@@ -29,10 +29,10 @@ import {
   FiAlertCircle,
   FiInfo
 } from 'react-icons/fi';
-import { useLanguage } from '../../i18n/LanguageContext';
+import { useLanguage } from '../../i18n/LanguageContext.js';
 import { formatDistanceToNow, format } from 'date-fns';
-import { getPriorityColor } from '../../utils/mockMessages';
-import TextToSpeech from '../accessibility/TextToSpeech';
+import { getPriorityColor } from '../../utils/mockMessages.js';
+import TextToSpeech from '../accessibility/TextToSpeech.js';
 
 // Helper to get the appropriate icon for a category
 const getCategoryIcon = (category) => {
