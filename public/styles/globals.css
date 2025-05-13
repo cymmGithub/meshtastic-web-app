@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 :root {
   --primary-color: #3498db;
   --primary-dark: #2980b9;
@@ -377,7 +379,6 @@ body {
 .btn-primary:hover {
   background-color: var(--primary-dark);
 }
-
 /* Accessibility focus styles */
 button:focus,
 input:focus,
@@ -385,4 +386,4 @@ select:focus,
 textarea:focus {
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
-} 
+}

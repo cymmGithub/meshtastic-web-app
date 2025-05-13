@@ -1,6 +1,5 @@
 import React from 'react';
 import { 
-  Box, 
   FormControl, 
   FormLabel, 
   Input, 
@@ -11,7 +10,6 @@ import {
   Badge,
   useColorModeValue,
   HStack,
-  Tooltip,
   InputGroup,
   InputLeftAddon,
   Icon

@@ -1,50 +1,4 @@
 import React, { useState, useEffect } from "react";
-import {
-   Box,
-   Container,
-   Flex,
-   Heading,
-   useColorModeValue,
-   Tabs,
-   TabList,
-   TabPanels,
-   Tab,
-   TabPanel,
-   Grid,
-   GridItem,
-   Button,
-   Icon,
-   FormControl,
-   FormLabel,
-   Textarea,
-   Input,
-   Select,
-   VStack,
-   Text,
-   Badge,
-   HStack,
-   useToast,
-   Card,
-   CardHeader,
-   CardBody,
-   Stat,
-   StatLabel,
-   StatNumber,
-   StatHelpText,
-   SimpleGrid,
-   Alert,
-   AlertIcon,
-   Checkbox,
-   Stack,
-   Modal,
-   ModalOverlay,
-   ModalContent,
-   ModalHeader,
-   ModalFooter,
-   ModalBody,
-   ModalCloseButton,
-   useDisclosure,
-} from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom";
 import {
    FiArrowLeft,
@@ -57,6 +11,8 @@ import {
    FiDatabase,
    FiPlus,
    FiMessageSquare,
+   FiBell,
+   FiInfo,
 } from "react-icons/fi";
 import { useLanguage } from "../../i18n/LanguageContext.js";
 import LanguageSelector from "../../components/ui/LanguageSelector.js";
@@ -64,6 +20,7 @@ import ThemeToggle from "../../components/ui/ThemeToggle.js";
 import { SkipLink } from "../../components/accessibility/index.js";
 import { categories } from "../../utils/templateData.js";
 import { messages } from "../../db/messages.js";
+import Badge from "../../components/ui/Badge.js";
 
 // Mock data for testing
 const mockNodes = [
@@ -190,6 +147,7 @@ const mockTemplates = [
 
 const AdminDashboard = () => {
    const { t } = useLanguage();
+   const [activeTab, setActiveTab] = useState(0);
    const [broadcastMessage, setBroadcastMessage] = useState("");
    const [messageCategory, setMessageCategory] = useState("");
    const [messagePriority, setMessagePriority] = useState("medium");
@@ -198,36 +156,17 @@ const AdminDashboard = () => {
    const [userRequests, setUserRequests] = useState(mockUserRequests);
    const [selectedRequests, setSelectedRequests] = useState([]);
    const [templates, setTemplates] = useState(mockTemplates);
+   const [isEditOpen, setIsEditOpen] = useState(false);
+   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+   const [isViewOpen, setIsViewOpen] = useState(false);
    const [selectedTemplate, setSelectedTemplate] = useState(null);
-   const {
-      isOpen: isEditOpen,
-      onOpen: onEditOpen,
-      onClose: onEditClose,
-   } = useDisclosure();
-   const {
-      isOpen: isDeleteOpen,
-      onOpen: onDeleteOpen,
-      onClose: onDeleteClose,
-   } = useDisclosure();
-   const toast = useToast();
-   const [templateContent, setTemplateContent] = useState({});
-   const {
-      isOpen: isViewOpen,
-      onOpen: onViewOpen,
-      onClose: onViewClose,
-   } = useDisclosure();
+   const [templateContent, setTemplateContent] = useState({
+      id: null,
+      name: "",
+      content: "",
+   });
    const [editingTemplateContent, setEditingTemplateContent] = useState("");
-
-   // Theme-aware colors
-   const bgColor = useColorModeValue("white", "gray.900");
-   const headerBgColor = useColorModeValue("blue.50", "blue.900");
-   const borderColor = useColorModeValue("gray.200", "gray.700");
-   const tabBgColor = useColorModeValue("white", "gray.800");
-   const statsCardBg = useColorModeValue("blue.50", "blue.900");
-   const cardHeaderBg = useColorModeValue("gray.50", "gray.700");
-   const logsBg = useColorModeValue("gray.50", "gray.800");
-   const requestCardBg = useColorModeValue("white", "gray.700");
-
+   
    // Load mockMessages on mount
    useEffect(() => {
       // In a real app, this would be an API call
@@ -245,15 +184,7 @@ const AdminDashboard = () => {
    // Form handlers
    const handleBroadcast = async () => {
       if (!broadcastMessage.trim() || !messageCategory || !messagePriority) {
-         toast({
-            title: t("formIncomplete") || "Form Incomplete",
-            description:
-               t("pleaseCompleteAllFields") ||
-               "Please complete all required fields",
-            status: "error",
-            duration: 5000,
-            isClosable: true,
-         });
+         alert(t("formIncomplete") || "Form Incomplete");
          return;
       }
 
@@ -265,15 +196,7 @@ const AdminDashboard = () => {
             broadcastMessage
          );
 
-         toast({
-            title: t("messageBroadcasted") || "Message Broadcasted",
-            description:
-               t("messageHasBeenSent") ||
-               "Your message has been sent to all recipients",
-            status: "success",
-            duration: 5000,
-            isClosable: true,
-         });
+         alert(t("messageBroadcasted") || "Message Broadcasted");
 
          // Reset form
          setBroadcastMessage("");
@@ -283,14 +206,7 @@ const AdminDashboard = () => {
          setTargetAudience("all");
       } catch (error) {
          console.error("Error saving message:", error);
-         toast({
-            title: t("error") || "Error",
-            description:
-               t("errorSavingMessage") || "Error saving message to database",
-            status: "error",
-            duration: 5000,
-            isClosable: true,
-         });
+         alert(t("errorSavingMessage") || "Error saving message to database");
       }
    };
 
@@ -313,80 +229,61 @@ const AdminDashboard = () => {
          )
       );
 
-      toast({
-         title: t("requestUpdated") || "Request Updated",
-         description:
-            t("requestStatusChanged") || "The request status has been updated",
-         status: "success",
-         duration: 3000,
-         isClosable: true,
-      });
+      alert(t("requestUpdated") || "Request Updated");
    };
 
+   // Helper functions for styling
    const getStatusColor = (status) => {
-      switch (status) {
-         case "online":
-            return "green";
-         case "offline":
-            return "red";
-         default:
-            return "gray";
-      }
+      return status === "online"
+         ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+         : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
    };
 
    const getSignalColor = (signal) => {
-      switch (signal) {
-         case "good":
-            return "green";
-         case "signalMedium":
-            return "yellow";
-         case "poor":
-            return "red";
-         default:
-            return "gray";
-      }
+      if (signal >= 80) return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+      if (signal >= 60) return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
+      if (signal >= 40) return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300";
+      return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
    };
 
    const getPriorityColor = (priority) => {
       switch (priority) {
-         case "critical":
-            return "red";
          case "high":
-            return "orange";
+            return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
          case "medium":
-            return "blue";
+            return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
          case "low":
-            return "green";
+            return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
          default:
-            return "gray";
+            return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
       }
    };
 
    const getRequestStatusColor = (status) => {
       switch (status) {
          case "pending":
-            return "yellow";
-         case "inProgress":
-            return "blue";
-         case "resolved":
-            return "green";
+            return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
+         case "in_progress":
+            return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
+         case "completed":
+            return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
          case "rejected":
-            return "red";
+            return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
          default:
-            return "gray";
+            return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
       }
    };
 
    const getRequestStatusLabel = (status) => {
       switch (status) {
          case "pending":
-            return t("requestPending") || "Pending";
-         case "inProgress":
-            return t("requestInProgress") || "In Progress";
-         case "resolved":
-            return t("requestResolved") || "Resolved";
+            return t("pending") || "Pending";
+         case "in_progress":
+            return t("inProgress") || "In Progress";
+         case "completed":
+            return t("completed") || "Completed";
          case "rejected":
-            return t("requestRejected") || "Rejected";
+            return t("rejected") || "Rejected";
          default:
             return status;
       }
@@ -394,30 +291,28 @@ const AdminDashboard = () => {
 
    const getCategoryIcon = (category) => {
       switch (category) {
-         case "urgentHelp":
-            return FiAlertTriangle;
-         case "medicalEmergency":
-            return FiActivity;
-         case "evacuation":
-            return FiUsers;
-         case "resources":
-            return FiDatabase;
-         case "infrastructure":
-            return FiRadio;
+         case "emergency":
+            return <FiAlertTriangle className="w-5 h-5" />;
+         case "alert":
+            return <FiBell className="w-5 h-5" />;
+         case "update":
+            return <FiInfo className="w-5 h-5" />;
+         case "general":
+            return <FiMessageSquare className="w-5 h-5" />;
          default:
-            return FiMessageSquare;
+            return <FiMessageSquare className="w-5 h-5" />;
       }
    };
 
    // Template handlers
    const handleEditTemplate = (template) => {
-      setSelectedTemplate({ ...template });
-      onEditOpen();
+      setSelectedTemplate(template);
+      setIsEditOpen(true);
    };
 
    const handleDeleteTemplate = (template) => {
       setSelectedTemplate(template);
-      onDeleteOpen();
+      setIsDeleteOpen(true);
    };
 
    const handleTemplateFormChange = (field, value) => {
@@ -435,14 +330,8 @@ const AdminDashboard = () => {
             )
          );
 
-         toast({
-            title: t("templateUpdated") || "Template Updated",
-            status: "success",
-            duration: 3000,
-            isClosable: true,
-         });
-
-         onEditClose();
+         alert(t("templateUpdated") || "Template Updated");
+         setIsEditOpen(false);
       }
    };
 
@@ -452,14 +341,8 @@ const AdminDashboard = () => {
             prev.filter((tpl) => tpl.id !== selectedTemplate.id)
          );
 
-         toast({
-            title: t("templateDeleted") || "Template Deleted",
-            status: "success",
-            duration: 3000,
-            isClosable: true,
-         });
-
-         onDeleteClose();
+         alert(t("templateDeleted") || "Template Deleted");
+         setIsDeleteOpen(false);
       }
    };
 
@@ -479,41 +362,21 @@ const AdminDashboard = () => {
          usageCount: 0,
          content: defaultContent,
       });
-      onEditOpen();
+      setIsEditOpen(true);
    };
 
-   // Add template view functionality
    const handleViewTemplate = (template) => {
-      // Get the translated content or fall back to template content
-      const templateContents = {
-         evacuationAlert: t("evacuationAlertContent"),
-         medicalAidAvailable: t("medicalAidContent"),
-         powerOutageUpdate: t("powerOutageContent"),
-         foodDistribution: t("foodDistributionContent"),
-      };
-
-      // Use template's content first, then fallback to translations if available, then use default content
-      const content =
-         template.content ||
-         templateContents[template.name] ||
-         `${t(template.name)} - ${t(template.category) || template.category}`;
-
       setTemplateContent({
-         name: t(template.name),
-         content: content,
          id: template.id,
-         category: template.category,
-         priority: template.priority,
+         name: template.name,
+         content: template.content,
       });
-
-      setEditingTemplateContent(content);
-      onViewOpen();
+      setEditingTemplateContent(template.content);
+      setIsViewOpen(true);
    };
 
    // Modify the handleSaveTemplateContent function to close the modal after saving
    const handleSaveTemplateContent = () => {
-      // Update the template content in our templates array
-      // In a real app, this would save to a database
       if (templateContent.id) {
          setTemplates((prev) =>
             prev.map((tpl) =>
@@ -524,28 +387,18 @@ const AdminDashboard = () => {
          );
       }
 
-      // Also update the current templateContent state
       setTemplateContent((prev) => ({
          ...prev,
          content: editingTemplateContent,
       }));
 
-      toast({
-         title: t("templateContentSaved") || "Template Content Saved",
-         status: "success",
-         duration: 3000,
-         isClosable: true,
-      });
-
-      // Close the modal after saving
-      onViewClose();
+      alert(t("templateContentSaved") || "Template Content Saved");
+      setIsViewOpen(false);
    };
 
    // Add a function to handle sending the message
    const handleSendTemplate = () => {
-      // In a real app, this would send the message
       if (templateContent.id) {
-         // Update the usage count for the template
          setTemplates((prev) =>
             prev.map((tpl) =>
                tpl.id === templateContent.id
@@ -559,324 +412,217 @@ const AdminDashboard = () => {
          );
       }
 
-      toast({
-         title: t("templateMessageSent") || "Template Message Sent",
-         description:
-            t("messageHasBeenSent") ||
-            "Your message has been sent to all recipients",
-         status: "success",
-         duration: 3000,
-         isClosable: true,
-      });
-
-      onViewClose();
+      alert(t("templateMessageSent") || "Template Message Sent");
+      setIsViewOpen(false);
    };
 
    return (
-      <Box position="relative">
-         {/* Add SkipLink for keyboard accessibility */}
-         <SkipLink targetId="main-content" />
-
-         <Box minH="100vh" p={0}>
-            <Container maxW="container.xl" p={0}>
-               <Flex
-                  as="header"
-                  align="center"
-                  justify="space-between"
-                  py={3}
-                  px={5}
-                  bg={headerBgColor}
-                  borderBottomWidth="1px"
-                  borderColor={borderColor}
-               >
-                  <Flex align="center">
-                     <Button
+      <div className="relative">
+         <div className="min-h-screen p-0">
+            <div className="container mx-auto p-0">
+               <header className="flex items-center justify-between py-3 px-5 bg-blue-50 dark:bg-blue-900 border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center">
+                     <button
                         as={RouterLink}
                         to="/"
-                        variant="ghost"
-                        leftIcon={<Icon as={FiArrowLeft} />}
-                        mr={2}
+                        className="mr-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
                         aria-label={t("backToHome") || "Back to home"}
-                        size="sm"
-                     />
-                     <Heading
-                        size={{ base: "md", md: "lg" }}
-                        color="purple.500"
                      >
+                        <FiArrowLeft className="w-5 h-5" />
+                     </button>
+                     <h1 className="text-xl md:text-2xl font-bold text-purple-600">
                         {t("adminDashboard") || "Admin Dashboard"}
-                     </Heading>
-                  </Flex>
-                  <Flex align="center" gap={2}>
+                     </h1>
+                  </div>
+                  <div className="flex items-center gap-2">
                      <LanguageSelector />
                      <ThemeToggle />
-                  </Flex>
-               </Flex>
+                  </div>
+               </header>
 
-               <Box
-                  id="main-content"
-                  as="main"
-                  p={4}
-                  bg={bgColor}
-                  tabIndex={-1}
-                  outline="none"
-               >
+               <main id="main-content" className="p-4 bg-white dark:bg-gray-900" tabIndex={-1}>
                   {/* Stats Overview Cards */}
-                  <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4} mb={6}>
-                     <Stat
-                        p={4}
-                        boxShadow="sm"
-                        borderRadius="lg"
-                        bg={statsCardBg}
-                     >
-                        <StatLabel display="flex" alignItems="center">
-                           <Icon as={FiRadio} mr={2} /> {t("activeNodes")}
-                        </StatLabel>
-                        <StatNumber>{stats.activeNodes}</StatNumber>
-                        <StatHelpText>{t("totalConnectedNodes")}</StatHelpText>
-                     </Stat>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                     <div className="p-4 shadow-sm rounded-lg bg-blue-50 dark:bg-blue-900">
+                        <div className="flex items-center mb-2">
+                           <FiRadio className="mr-2" /> {t("activeNodes")}
+                        </div>
+                        <div className="text-2xl font-bold">{stats.activeNodes}</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">{t("totalConnectedNodes")}</div>
+                     </div>
 
-                     <Stat
-                        p={4}
-                        boxShadow="sm"
-                        borderRadius="lg"
-                        bg={statsCardBg}
-                     >
-                        <StatLabel display="flex" alignItems="center">
-                           <Icon as={FiUsers} mr={2} /> {t("onlineUsers")}
-                        </StatLabel>
-                        <StatNumber>{stats.onlineUsers}</StatNumber>
-                        <StatHelpText>{t("connectedToNetwork")}</StatHelpText>
-                     </Stat>
+                     <div className="p-4 shadow-sm rounded-lg bg-blue-50 dark:bg-blue-900">
+                        <div className="flex items-center mb-2">
+                           <FiUsers className="mr-2" /> {t("onlineUsers")}
+                        </div>
+                        <div className="text-2xl font-bold">{stats.onlineUsers}</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">{t("connectedToNetwork")}</div>
+                     </div>
 
-                     <Stat
-                        p={4}
-                        boxShadow="sm"
-                        borderRadius="lg"
-                        bg={statsCardBg}
-                     >
-                        <StatLabel display="flex" alignItems="center">
-                           <Icon as={FiSend} mr={2} /> {t("pendingMessages")}
-                        </StatLabel>
-                        <StatNumber>{stats.pendingMessages}</StatNumber>
-                        <StatHelpText>{t("awaitingDelivery")}</StatHelpText>
-                     </Stat>
+                     <div className="p-4 shadow-sm rounded-lg bg-blue-50 dark:bg-blue-900">
+                        <div className="flex items-center mb-2">
+                           <FiSend className="mr-2" /> {t("pendingMessages")}
+                        </div>
+                        <div className="text-2xl font-bold">{stats.pendingMessages}</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">{t("awaitingDelivery")}</div>
+                     </div>
 
-                     <Stat
-                        p={4}
-                        boxShadow="sm"
-                        borderRadius="lg"
-                        bg={statsCardBg}
-                     >
-                        <StatLabel display="flex" alignItems="center">
-                           <Icon as={FiActivity} mr={2} /> {t("batteryAvg")}
-                        </StatLabel>
-                        <StatNumber>{stats.batteryAvg}%</StatNumber>
-                        <StatHelpText>{t("acrossAllNodes")}</StatHelpText>
-                     </Stat>
-                  </SimpleGrid>
+                     <div className="p-4 shadow-sm rounded-lg bg-blue-50 dark:bg-blue-900">
+                        <div className="flex items-center mb-2">
+                           <FiActivity className="mr-2" /> {t("batteryAvg")}
+                        </div>
+                        <div className="text-2xl font-bold">{stats.batteryAvg}%</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">{t("acrossAllNodes")}</div>
+                     </div>
+                  </div>
 
                   {/* System Alert */}
-                  <Alert status="warning" mb={6} borderRadius="md">
-                     <AlertIcon />
-                     <Text>{t("lowBatteryWarning")}</Text>
-                  </Alert>
+                  <div className="mb-6 p-4 bg-yellow-100 dark:bg-yellow-900 rounded-md flex items-center">
+                     <FiAlertTriangle className="mr-2 text-yellow-500" />
+                     <span>{t("lowBatteryWarning")}</span>
+                  </div>
 
                   {/* Main Tabs Interface */}
-                  <Tabs
-                     variant="enclosed"
-                     colorScheme="purple"
-                     bg={tabBgColor}
-                     borderRadius="md"
-                     boxShadow="sm"
-                  >
-                     <TabList
-                        mb={4}
-                        overflowX="auto"
-                        css={{ scrollbarWidth: "thin" }}
-                     >
-                        <Tab>
-                           <Icon as={FiSend} mr={2} /> {t("broadcast")}
-                        </Tab>
-                        <Tab>
-                           <Icon as={FiMessageSquare} mr={2} />{" "}
-                           {t("userMessages")}
-                        </Tab>
-                        <Tab>
-                           <Icon as={FiRadio} mr={2} /> {t("nodes")}
-                        </Tab>
-                        <Tab>
-                           <Icon as={FiList} mr={2} /> {t("templates")}
-                        </Tab>
-                        <Tab>
-                           <Icon as={FiDatabase} mr={2} /> {t("logs")}
-                        </Tab>
-                     </TabList>
-
-                     <TabPanels>
-                        {/* Broadcast Tab */}
-                        <TabPanel>
-                           <VStack spacing={6} align="stretch">
-                              <Heading as="h2" size="md" mb={2}>
-                                 {t("broadcastMessage")}
-                              </Heading>
-
-                              <Grid
-                                 templateColumns={{
-                                    base: "1fr",
-                                    md: "1fr 1fr",
-                                 }}
-                                 gap={6}
+                  <div className="bg-white dark:bg-gray-800 rounded-md shadow-sm">
+                     <div className="border-b border-gray-200 dark:border-gray-700">
+                        <nav className="flex overflow-x-auto">
+                           {[
+                              { icon: FiSend, label: t("broadcast") },
+                              { icon: FiMessageSquare, label: t("userMessages") },
+                              { icon: FiRadio, label: t("nodes") },
+                              { icon: FiList, label: t("templates") },
+                              { icon: FiDatabase, label: t("logs") },
+                           ].map((tab, index) => (
+                              <button
+                                 key={index}
+                                 className={`flex items-center px-4 py-2 border-b-2 ${
+                                    activeTab === index
+                                       ? "border-purple-500 text-purple-600"
+                                       : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                                 }`}
+                                 onClick={() => setActiveTab(index)}
                               >
-                                 <GridItem>
-                                    <FormControl isRequired mb={4}>
-                                       <FormLabel htmlFor="message-category">
+                                 <tab.icon className="mr-2" />
+                                 {tab.label}
+                              </button>
+                           ))}
+                        </nav>
+                     </div>
+
+                     <div className="p-4">
+                        {/* Broadcast Tab */}
+                        {activeTab === 0 && (
+                           <div className="space-y-6">
+                              <h2 className="text-lg font-semibold mb-2">
+                                 {t("broadcastMessage")}
+                              </h2>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                 <div>
+                                    <div className="mb-4">
+                                       <label className="block text-sm font-medium mb-1">
                                           {t("messageCategory")}
-                                       </FormLabel>
-                                       <Select
-                                          id="message-category"
-                                          placeholder={t("selectCategory")}
+                                       </label>
+                                       <select
+                                          className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700"
                                           value={messageCategory}
-                                          onChange={(e) =>
-                                             setMessageCategory(e.target.value)
-                                          }
+                                          onChange={(e) => setMessageCategory(e.target.value)}
                                        >
+                                          <option value="">{t("selectCategory")}</option>
                                           {categories.map((category) => (
-                                             <option
-                                                key={category}
-                                                value={category}
-                                             >
+                                             <option key={category} value={category}>
                                                 {t(category)}
                                              </option>
                                           ))}
-                                       </Select>
-                                    </FormControl>
+                                       </select>
+                                    </div>
 
-                                    <FormControl isRequired mb={4}>
-                                       <FormLabel htmlFor="message-priority">
+                                    <div className="mb-4">
+                                       <label className="block text-sm font-medium mb-1">
                                           {t("messagePriority")}
-                                       </FormLabel>
-                                       <Select
-                                          id="message-priority"
+                                       </label>
+                                       <select
+                                          className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700"
                                           value={messagePriority}
-                                          onChange={(e) =>
-                                             setMessagePriority(e.target.value)
-                                          }
+                                          onChange={(e) => setMessagePriority(e.target.value)}
                                        >
-                                          <option value="critical">
-                                             {t("critical")}
-                                          </option>
-                                          <option value="high">
-                                             {t("high")}
-                                          </option>
-                                          <option value="medium">
-                                             {t("medium")}
-                                          </option>
-                                          <option value="low">
-                                             {t("low")}
-                                          </option>
-                                       </Select>
-                                    </FormControl>
+                                          <option value="critical">{t("critical")}</option>
+                                          <option value="high">{t("high")}</option>
+                                          <option value="medium">{t("medium")}</option>
+                                          <option value="low">{t("low")}</option>
+                                       </select>
+                                    </div>
 
-                                    <FormControl mb={4}>
-                                       <FormLabel htmlFor="target-audience">
+                                    <div className="mb-4">
+                                       <label className="block text-sm font-medium mb-1">
                                           {t("targetAudience")}
-                                       </FormLabel>
-                                       <Select
-                                          id="target-audience"
+                                       </label>
+                                       <select
+                                          className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700"
                                           value={targetAudience}
-                                          onChange={(e) =>
-                                             setTargetAudience(e.target.value)
-                                          }
+                                          onChange={(e) => setTargetAudience(e.target.value)}
                                        >
-                                          <option value="all">
-                                             {t("allUsers")}
-                                          </option>
-                                          <option value="north">
-                                             {t("northDistrict")}
-                                          </option>
-                                          <option value="central">
-                                             {t("centralDistrict")}
-                                          </option>
-                                          <option value="east">
-                                             {t("eastDistrict")}
-                                          </option>
-                                          <option value="emergency">
-                                             {t("emergencyPersonnel")}
-                                          </option>
-                                       </Select>
-                                    </FormControl>
-                                 </GridItem>
+                                          <option value="all">{t("allUsers")}</option>
+                                          <option value="north">{t("northDistrict")}</option>
+                                          <option value="central">{t("centralDistrict")}</option>
+                                          <option value="east">{t("eastDistrict")}</option>
+                                          <option value="emergency">{t("emergencyPersonnel")}</option>
+                                       </select>
+                                    </div>
+                                 </div>
 
-                                 <GridItem>
-                                    <FormControl isRequired mb={4}>
-                                       <FormLabel htmlFor="message-title">
+                                 <div>
+                                    <div className="mb-4">
+                                       <label className="block text-sm font-medium mb-1">
                                           {t("messageTitle")}
-                                       </FormLabel>
-                                       <Input
-                                          id="message-title"
+                                       </label>
+                                       <input
+                                          type="text"
+                                          className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700"
                                           placeholder={t("enterMessageTitle")}
                                           value={messageTitle}
-                                          onChange={(e) =>
-                                             setMessageTitle(e.target.value)
-                                          }
+                                          onChange={(e) => setMessageTitle(e.target.value)}
                                        />
-                                    </FormControl>
+                                    </div>
 
-                                    <FormControl isRequired mb={4} h="100%">
-                                       <FormLabel htmlFor="broadcast-message">
+                                    <div className="mb-4 h-full">
+                                       <label className="block text-sm font-medium mb-1">
                                           {t("messageContent")}
-                                       </FormLabel>
-                                       <Textarea
-                                          id="broadcast-message"
+                                       </label>
+                                       <textarea
+                                          className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 h-32 resize-none"
                                           placeholder={t("enterYourMessage")}
                                           value={broadcastMessage}
-                                          onChange={(e) =>
-                                             setBroadcastMessage(e.target.value)
-                                          }
-                                          h="calc(100% - 32px)"
-                                          minH="150px"
-                                          resize="none"
+                                          onChange={(e) => setBroadcastMessage(e.target.value)}
                                        />
-                                    </FormControl>
-                                 </GridItem>
-                                 <Box textAlign="right">
-                                    <Button
-                                       colorScheme="purple"
-                                       leftIcon={<Icon as={FiSend} />}
-                                       onClick={handleBroadcast}
-                                       isDisabled={
-                                          !broadcastMessage.trim() ||
-                                          !messageCategory ||
-                                          !messagePriority
-                                       }
-                                    >
-                                       {t("broadcast")}
-                                    </Button>
-                                 </Box>
-                              </Grid>
-                           </VStack>
-                        </TabPanel>
+                                    </div>
+                                 </div>
+
+                                 <button
+                                    className="col-span-2 flex items-center justify-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    onClick={handleBroadcast}
+                                    disabled={!broadcastMessage.trim() || !messageCategory || !messagePriority}
+                                 >
+                                    <FiSend className="mr-2" />
+                                    {t("broadcast")}
+                                 </button>
+                              </div>
+                           </div>
+                        )}
 
                         {/* User Messages Tab */}
-                        <TabPanel>
-                           <VStack spacing={4} align="stretch">
-                              <Flex
-                                 justify="space-between"
-                                 align="center"
-                                 mb={2}
-                              >
-                                 <Heading as="h2" size="md">
+                        {activeTab === 1 && (
+                           <div className="space-y-4">
+                              <div className="flex justify-between items-center mb-2">
+                                 <h2 className="text-lg font-semibold">
                                     {t("userMessages")}
-                                 </Heading>
-                                 <HStack spacing={2}>
-                                    <Select
-                                       size="sm"
-                                       width="auto"
+                                 </h2>
+                                 <div className="flex items-center gap-2">
+                                    <select
+                                       className="w-auto"
                                        placeholder={t("filterByCategory")}
                                     >
-                                       <option value="all">
-                                          {t("allMessages")}
-                                       </option>
+                                       <option value="all">{t("allMessages")}</option>
                                        {categories.map((category) => (
                                           <option
                                              key={category}
@@ -885,733 +631,567 @@ const AdminDashboard = () => {
                                              {t(category)}
                                           </option>
                                        ))}
-                                    </Select>
-                                    <Select
-                                       size="sm"
-                                       width="auto"
+                                    </select>
+                                    <select
+                                       className="w-auto"
                                        placeholder={t("filterByStatus")}
                                     >
-                                       <option value="all">
-                                          {t("allStatuses")}
-                                       </option>
-                                       <option value="pending">
-                                          {t("requestPending")}
-                                       </option>
-                                       <option value="inProgress">
-                                          {t("requestInProgress")}
-                                       </option>
-                                       <option value="resolved">
-                                          {t("requestResolved")}
-                                       </option>
-                                    </Select>
-                                 </HStack>
-                              </Flex>
+                                       <option value="all">{t("allStatuses")}</option>
+                                       <option value="pending">{t("requestPending")}</option>
+                                       <option value="inProgress">{t("requestInProgress")}</option>
+                                       <option value="resolved">{t("requestResolved")}</option>
+                                    </select>
+                                 </div>
+                              </div>
 
                               {userRequests.length > 0 ? (
-                                 <VStack spacing={4} align="stretch">
+                                 <div className="space-y-4">
                                     {userRequests.map((request) => (
-                                       <Card
+                                       <div
                                           key={request.id}
-                                          variant="outline"
-                                          borderRadius="md"
-                                          bg={requestCardBg}
+                                          className="p-4 border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700"
                                        >
-                                          <CardBody p={4}>
-                                             <Flex
-                                                direction={{
-                                                   base: "column",
-                                                   md: "row",
-                                                }}
-                                                justify="space-between"
-                                             >
-                                                <Box
-                                                   flex="1"
-                                                   mb={{ base: 4, md: 0 }}
-                                                >
-                                                   <Flex
-                                                      mb={2}
-                                                      alignItems="center"
+                                          <div className="flex flex-col md:flex-row justify-between">
+                                             <div className="flex-1 mb-2">
+                                                <div className="flex mb-2 items-center">
+                                                   <input
+                                                      type="checkbox"
+                                                      checked={selectedRequests.includes(request.id)}
+                                                      onChange={() => handleRequestSelect(request.id)}
+                                                      className="mr-3"
+                                                   />
+                                                   <Badge
+                                                      className={`${getPriorityColor(request.priority)} mr-2`}
                                                    >
-                                                      <Checkbox
-                                                         isChecked={selectedRequests.includes(
-                                                            request.id
-                                                         )}
-                                                         onChange={() =>
-                                                            handleRequestSelect(
-                                                               request.id
-                                                            )
-                                                         }
-                                                         mr={3}
-                                                      />
-                                                      <Badge
-                                                         colorScheme={getPriorityColor(
-                                                            request.priority
-                                                         )}
-                                                         mr={2}
-                                                      >
-                                                         {t(request.priority)}
-                                                      </Badge>
-                                                      <Text fontWeight="bold">
-                                                         {request.sender} -{" "}
-                                                         {request.userLocation}
-                                                      </Text>
-                                                   </Flex>
+                                                      {t(request.priority)}
+                                                   </Badge>
+                                                   <span className="font-bold">
+                                                      {request.sender} - {request.userLocation}
+                                                   </span>
+                                                </div>
 
-                                                   <Flex
-                                                      mb={2}
-                                                      alignItems="center"
+                                                <div className="flex mb-2 items-center">
+                                                   {getCategoryIcon(request.category)}
+                                                   <span
+                                                      className="font-medium text-gray-600 dark:text-gray-400"
                                                    >
-                                                      <Icon
-                                                         as={getCategoryIcon(
-                                                            request.category
-                                                         )}
-                                                         color={`${getPriorityColor(
-                                                            request.priority
-                                                         )}.500`}
-                                                         mr={2}
-                                                      />
-                                                      <Text
-                                                         fontWeight="medium"
-                                                         color="gray.600"
-                                                      >
-                                                         {t(request.category)}
-                                                      </Text>
-                                                   </Flex>
+                                                      {t(request.category)}
+                                                   </span>
+                                                </div>
 
-                                                   <Text mb={3}>
-                                                      {request.message}
-                                                   </Text>
+                                                <span className="text-gray-500 text-sm">
+                                                   {request.message}
+                                                </span>
 
-                                                   <Flex
-                                                      alignItems="center"
-                                                      fontSize="sm"
-                                                      color="gray.500"
+                                                <div className="flex items-center font-sm text-gray-500 mt-2">
+                                                   <span>
+                                                      {new Date(request.timestamp).toLocaleString()}
+                                                   </span>
+                                                   <Badge
+                                                      className={getRequestStatusColor(request.status)}
                                                    >
-                                                      <Text>
-                                                         {new Date(
-                                                            request.timestamp
-                                                         ).toLocaleString()}
-                                                      </Text>
-                                                      <Badge
-                                                         ml={3}
-                                                         colorScheme={getRequestStatusColor(
-                                                            request.status
-                                                         )}
+                                                      {getRequestStatusLabel(request.status)}
+                                                   </Badge>
+                                                </div>
+                                             </div>
+
+                                             <div className="flex flex-col md:flex-row items-center justify-end">
+                                                {request.status === "pending" && (
+                                                   <>
+                                                      <button
+                                                         className="text-sm text-blue-500 hover:text-blue-700 mr-2"
+                                                         onClick={() => handleUpdateRequestStatus(request.id, "inProgress")}
                                                       >
-                                                         {getRequestStatusLabel(
-                                                            request.status
-                                                         )}
-                                                      </Badge>
-                                                   </Flex>
-                                                </Box>
-
-                                                <Stack
-                                                   direction={{
-                                                      base: "row",
-                                                      md: "column",
-                                                   }}
-                                                   spacing={2}
-                                                   align={{
-                                                      base: "center",
-                                                      md: "flex-end",
-                                                   }}
-                                                   ml={{ base: 0, md: 4 }}
-                                                >
-                                                   {request.status ===
-                                                      "pending" && (
-                                                      <>
-                                                         <Button
-                                                            size="sm"
-                                                            colorScheme="blue"
-                                                            onClick={() =>
-                                                               handleUpdateRequestStatus(
-                                                                  request.id,
-                                                                  "inProgress"
-                                                               )
-                                                            }
-                                                         >
-                                                            {t(
-                                                               "startProcessing"
-                                                            )}
-                                                         </Button>
-                                                         <Button
-                                                            size="sm"
-                                                            colorScheme="green"
-                                                            onClick={() =>
-                                                               handleUpdateRequestStatus(
-                                                                  request.id,
-                                                                  "resolved"
-                                                               )
-                                                            }
-                                                         >
-                                                            {t("markResolved")}
-                                                         </Button>
-                                                      </>
-                                                   )}
-
-                                                   {request.status ===
-                                                      "inProgress" && (
-                                                      <Button
-                                                         size="sm"
-                                                         colorScheme="green"
-                                                         onClick={() =>
-                                                            handleUpdateRequestStatus(
-                                                               request.id,
-                                                               "resolved"
-                                                            )
-                                                         }
+                                                         {t("startProcessing")}
+                                                      </button>
+                                                      <button
+                                                         className="text-sm text-green-500 hover:text-green-700"
+                                                         onClick={() => handleUpdateRequestStatus(request.id, "resolved")}
                                                       >
                                                          {t("markResolved")}
-                                                      </Button>
-                                                   )}
+                                                      </button>
+                                                   </>
+                                                )}
 
-                                                   <Button
-                                                      size="sm"
-                                                      colorScheme="purple"
-                                                      variant="outline"
+                                                {request.status === "inProgress" && (
+                                                   <button
+                                                      className="text-sm text-green-500 hover:text-green-700"
+                                                      onClick={() => handleUpdateRequestStatus(request.id, "resolved")}
                                                    >
-                                                      {t("reply")}
-                                                   </Button>
-                                                </Stack>
-                                             </Flex>
-                                          </CardBody>
-                                       </Card>
+                                                      {t("markResolved")}
+                                                   </button>
+                                                )}
+
+                                                <button
+                                                   className="text-sm text-purple-500 hover:text-purple-700"
+                                                   onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      handleRequestSelect(request.id);
+                                                   }}
+                                                >
+                                                   {t("reply")}
+                                                </button>
+                                             </div>
+                                          </div>
+                                       </div>
                                     ))}
-                                 </VStack>
+                                 </div>
                               ) : (
-                                 <Box
-                                    p={6}
-                                    textAlign="center"
-                                    borderRadius="md"
-                                    borderWidth="1px"
-                                    borderColor={borderColor}
-                                 >
-                                    <Icon
-                                       as={FiMessageSquare}
-                                       boxSize={10}
-                                       color="gray.400"
-                                       mb={3}
-                                    />
-                                    <Heading size="md" mb={2}>
-                                       {t("noUserMessages") ||
-                                          "No User Messages"}
-                                    </Heading>
-                                    <Text>
-                                       {t("noUserMessagesDesc") ||
-                                          "There are no user messages or help requests at this time."}
-                                    </Text>
-                                 </Box>
+                                 <div className="p-6 text-center border border-gray-200 dark:border-gray-700 rounded-md">
+                                    <FiMessageSquare className="text-gray-400 w-10 h-10 mb-3" />
+                                    <h2 className="text-md font-semibold mb-2">
+                                       {t("noUserMessages") || "No User Messages"}
+                                    </h2>
+                                    <p>
+                                       {t("noUserMessagesDesc") || "There are no user messages or help requests at this time."}
+                                    </p>
+                                 </div>
                               )}
 
                               {selectedRequests.length > 0 && (
-                                 <Flex
-                                    justify="space-between"
-                                    align="center"
-                                    mt={2}
-                                 >
-                                    <Text>
-                                       {selectedRequests.length}{" "}
-                                       {selectedRequests.length === 1
-                                          ? t("itemSelected")
-                                          : t("itemsSelected")}
-                                    </Text>
-                                    <HStack spacing={2}>
-                                       <Button
-                                          size="sm"
-                                          colorScheme="blue"
+                                 <div className="flex justify-between items-center mt-2">
+                                    <span>
+                                       {selectedRequests.length} {selectedRequests.length === 1 ? t("itemSelected") : t("itemsSelected")}
+                                    </span>
+                                    <div className="flex items-center gap-2">
+                                       <button
+                                          className="text-sm text-blue-500 hover:text-blue-700"
                                           onClick={() => {
-                                             selectedRequests.forEach((id) =>
-                                                handleUpdateRequestStatus(
-                                                   id,
-                                                   "inProgress"
-                                                )
-                                             );
+                                             selectedRequests.forEach((id) => handleUpdateRequestStatus(id, "inProgress"));
                                              setSelectedRequests([]);
                                           }}
                                        >
                                           {t("processSelected")}
-                                       </Button>
-                                       <Button
-                                          size="sm"
-                                          colorScheme="green"
+                                       </button>
+                                       <button
+                                          className="text-sm text-green-500 hover:text-green-700"
                                           onClick={() => {
-                                             selectedRequests.forEach((id) =>
-                                                handleUpdateRequestStatus(
-                                                   id,
-                                                   "resolved"
-                                                )
-                                             );
+                                             selectedRequests.forEach((id) => handleUpdateRequestStatus(id, "resolved"));
                                              setSelectedRequests([]);
                                           }}
                                        >
                                           {t("resolveSelected")}
-                                       </Button>
-                                    </HStack>
-                                 </Flex>
+                                       </button>
+                                    </div>
+                                 </div>
                               )}
-                           </VStack>
-                        </TabPanel>
+                           </div>
+                        )}
 
                         {/* Nodes Tab */}
-                        <TabPanel>
-                           <VStack spacing={4} align="stretch">
-                              <Heading as="h2" size="md" mb={2}>
+                        {activeTab === 2 && (
+                           <div className="space-y-4">
+                              <h2 className="text-lg font-semibold mb-2">
                                  {t("networkNodes")}
-                              </Heading>
+                              </h2>
 
                               {mockNodes.map((node) => (
-                                 <Card
+                                 <div
                                     key={node.id}
-                                    variant="outline"
-                                    borderRadius="md"
+                                    className="p-4 border border-gray-200 dark:border-gray-700 rounded-md"
                                  >
-                                    <CardHeader bg={cardHeaderBg}>
-                                       <Flex
-                                          justify="space-between"
-                                          align="center"
+                                    <div className="flex justify-between items-center">
+                                       <h3 className="text-sm font-semibold">
+                                          {typeof node.name === "function" ? node.name(t) : node.name}
+                                       </h3>
+                                       <Badge
+                                          className={getStatusColor(node.status)}
                                        >
-                                          <Heading size="sm">
-                                             {typeof node.name === "function"
-                                                ? node.name(t)
-                                                : node.name}
-                                          </Heading>
-                                          <Badge
-                                             colorScheme={getStatusColor(
-                                                node.status
-                                             )}
-                                          >
-                                             {node.status === "online"
-                                                ? t("online")
-                                                : t("offline")}
-                                          </Badge>
-                                       </Flex>
-                                    </CardHeader>
-                                    <CardBody p={4}>
-                                       <Grid
-                                          templateColumns="repeat(3, 1fr)"
-                                          gap={4}
+                                          {node.status === "online" ? t("online") : t("offline")}
+                                       </Badge>
+                                    </div>
+                                    <div className="mt-2 grid grid-cols-3 gap-4">
+                                       <div className="text-sm text-gray-600 dark:text-gray-400">
+                                          {t("connectedUsers")}
+                                       </div>
+                                       <div className="text-sm text-gray-600 dark:text-gray-400">
+                                          {node.users}
+                                       </div>
+                                       <div className="text-sm text-gray-600 dark:text-gray-400">
+                                          {t("batteryLevel")}
+                                       </div>
+                                       <div className="text-sm text-gray-600 dark:text-gray-400">
+                                          {node.battery}%
+                                       </div>
+                                       <div className="text-sm text-gray-600 dark:text-gray-400">
+                                          {t("signalStrength")}
+                                       </div>
+                                       <Badge
+                                          className={getSignalColor(node.signal)}
                                        >
-                                          <Stat size="sm">
-                                             <StatLabel fontSize="xs">
-                                                {t("connectedUsers")}
-                                             </StatLabel>
-                                             <StatNumber fontSize="md">
-                                                {node.users}
-                                             </StatNumber>
-                                          </Stat>
-                                          <Stat size="sm">
-                                             <StatLabel fontSize="xs">
-                                                {t("batteryLevel")}
-                                             </StatLabel>
-                                             <StatNumber fontSize="md">
-                                                {node.battery}%
-                                             </StatNumber>
-                                          </Stat>
-                                          <Stat size="sm">
-                                             <StatLabel fontSize="xs">
-                                                {t("signalStrength")}
-                                             </StatLabel>
-                                             <Badge
-                                                colorScheme={getSignalColor(
-                                                   node.signal
-                                                )}
-                                             >
-                                                {t(node.signal)}
-                                             </Badge>
-                                          </Stat>
-                                       </Grid>
-                                    </CardBody>
-                                 </Card>
+                                          {t(node.signal)}
+                                       </Badge>
+                                    </div>
+                                 </div>
                               ))}
-                           </VStack>
-                        </TabPanel>
+                           </div>
+                        )}
 
                         {/* Templates Tab */}
-                        <TabPanel>
-                           <VStack spacing={4} align="stretch">
-                              <Flex
-                                 justify="space-between"
-                                 align="center"
-                                 mb={2}
-                              >
-                                 <Heading as="h2" size="md">
+                        {activeTab === 3 && (
+                           <div className="space-y-4">
+                              <div className="flex justify-between items-center mb-2">
+                                 <h2 className="text-lg font-semibold">
                                     {t("messageTemplates")}
-                                 </Heading>
-                                 <Button
-                                    size="sm"
-                                    colorScheme="purple"
-                                    leftIcon={<Icon as={FiPlus} />}
+                                 </h2>
+                                 <button
+                                    className="text-sm text-purple-500 hover:text-purple-700"
                                     onClick={handleAddNewTemplate}
                                  >
                                     {t("addTemplate")}
-                                 </Button>
-                              </Flex>
+                                 </button>
+                              </div>
 
                               {templates.length > 0 ? (
                                  templates.map((template) => (
-                                    <Card
+                                    <div
                                        key={template.id}
-                                       variant="outline"
-                                       borderRadius="md"
-                                       cursor="pointer"
-                                       onClick={() =>
-                                          handleViewTemplate(template)
-                                       }
+                                       className="p-4 border border-gray-200 dark:border-gray-700 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+                                       onClick={() => handleViewTemplate(template)}
                                     >
-                                       <CardBody p={4}>
-                                          <Grid
-                                             templateColumns={{
-                                                base: "1fr",
-                                                md: "1fr 120px 120px 100px",
-                                             }}
-                                             gap={4}
-                                             alignItems="center"
+                                       <div className="grid grid-cols-4 gap-4 items-center">
+                                          <div>
+                                             <h3 className="font-semibold">
+                                                {t(template.name)}
+                                             </h3>
+                                             <span className="text-sm text-gray-500">
+                                                {t("category")}: {t(template.category)}
+                                             </span>
+                                          </div>
+                                          <Badge
+                                             className={getPriorityColor(template.priority)}
                                           >
-                                             <Box>
-                                                <Text fontWeight="bold">
-                                                   {t(template.name)}
-                                                </Text>
-                                                <Text
-                                                   fontSize="sm"
-                                                   color="gray.500"
-                                                >
-                                                   {t("category")}:{" "}
-                                                   {t(template.category)}
-                                                </Text>
-                                             </Box>
-                                             <Badge
-                                                colorScheme={getPriorityColor(
-                                                   template.priority
-                                                )}
-                                                w="fit-content"
+                                             {t(template.priority)}
+                                          </Badge>
+                                          <div className="text-sm">
+                                             {t("usedTimes", { count: template.usageCount })}
+                                          </div>
+                                          <div className="flex items-center justify-end">
+                                             <button
+                                                className="text-sm text-blue-500 hover:text-blue-700 mr-2"
+                                                onClick={(e) => {
+                                                   e.stopPropagation();
+                                                   handleEditTemplate(template);
+                                                }}
                                              >
-                                                {t(template.priority)}
-                                             </Badge>
-                                             <Text fontSize="sm">
-                                                {t("usedTimes", {
-                                                   count: template.usageCount,
-                                                })}
-                                             </Text>
-                                             <HStack
-                                                spacing={2}
-                                                onClick={(e) =>
-                                                   e.stopPropagation()
-                                                }
+                                                {t("edit")}
+                                             </button>
+                                             <button
+                                                className="text-sm text-red-500 hover:text-red-700"
+                                                onClick={(e) => {
+                                                   e.stopPropagation();
+                                                   handleDeleteTemplate(template);
+                                                }}
                                              >
-                                                <Button
-                                                   size="sm"
-                                                   colorScheme="blue"
-                                                   variant="outline"
-                                                   onClick={(e) => {
-                                                      e.stopPropagation();
-                                                      handleEditTemplate(
-                                                         template
-                                                      );
-                                                   }}
-                                                >
-                                                   {t("edit")}
-                                                </Button>
-                                                <Button
-                                                   size="sm"
-                                                   colorScheme="red"
-                                                   variant="ghost"
-                                                   onClick={(e) => {
-                                                      e.stopPropagation();
-                                                      handleDeleteTemplate(
-                                                         template
-                                                      );
-                                                   }}
-                                                >
-                                                   {t("delete")}
-                                                </Button>
-                                             </HStack>
-                                          </Grid>
-                                       </CardBody>
-                                    </Card>
+                                                {t("delete")}
+                                             </button>
+                                          </div>
+                                       </div>
+                                    </div>
                                  ))
                               ) : (
-                                 <Box
-                                    p={6}
-                                    textAlign="center"
-                                    borderRadius="md"
-                                    borderWidth="1px"
-                                    borderColor={borderColor}
-                                 >
-                                    <Heading size="md" mb={2}>
+                                 <div className="p-6 text-center border border-gray-200 dark:border-gray-700 rounded-md">
+                                    <h2 className="text-md font-semibold mb-2">
                                        {t("noTemplates") || "No Templates"}
-                                    </Heading>
-                                    <Text>
-                                       {t("noTemplatesDesc") ||
-                                          'There are no message templates defined yet. Click "Add Template" to create one.'}
-                                    </Text>
-                                 </Box>
+                                    </h2>
+                                    <p>
+                                       {t("noTemplatesDesc") || 'There are no message templates defined yet. Click "Add Template" to create one.'}
+                                    </p>
+                                 </div>
                               )}
-                           </VStack>
-                        </TabPanel>
+                           </div>
+                        )}
 
                         {/* System Logs Tab */}
-                        <TabPanel>
-                           <VStack spacing={4} align="stretch">
-                              <Heading as="h2" size="md" mb={2}>
+                        {activeTab === 4 && (
+                           <div className="space-y-4">
+                              <h2 className="text-lg font-semibold mb-2">
                                  {t("systemLogs")}
-                              </Heading>
+                              </h2>
 
-                              <Box
-                                 p={4}
-                                 border="1px"
-                                 borderColor={borderColor}
-                                 borderRadius="md"
-                                 fontFamily="monospace"
-                                 fontSize="sm"
-                                 bg={logsBg}
-                                 overflowX="auto"
-                                 height="400px"
-                                 overflowY="scroll"
-                              >
-                                 <Text color="green.500">
-                                    [2025-05-11 08:15:23] INFO: System started
-                                    successfully
-                                 </Text>
-                                 <Text color="blue.500">
-                                    [2025-05-11 08:16:45] INFO: Node 'North
-                                    District Hub' connected
-                                 </Text>
-                                 <Text color="blue.500">
-                                    [2025-05-11 08:17:12] INFO: Node 'Central
-                                    Square' connected
-                                 </Text>
-                                 <Text color="yellow.500">
-                                    [2025-05-11 08:18:03] WARN: Node 'East
-                                    Hospital' battery level low (23%)
-                                 </Text>
-                                 <Text color="blue.500">
-                                    [2025-05-11 08:20:41] INFO: User broadcast
-                                    sent to all nodes
-                                 </Text>
-                                 <Text color="red.500">
-                                    [2025-05-11 08:32:17] ERROR: Connection to
-                                    node 'East Hospital' lost
-                                 </Text>
-                                 <Text color="blue.500">
-                                    [2025-05-11 08:45:22] INFO: 24 users
-                                    connected to 'North District Hub'
-                                 </Text>
-                                 <Text color="blue.500">
-                                    [2025-05-11 09:05:11] INFO: Message template
-                                    'Evacuation Alert' used
-                                 </Text>
-                                 <Text color="blue.500">
-                                    [2025-05-11 09:15:33] INFO: Node 'School
-                                    Zone' connected
-                                 </Text>
-                                 <Text color="yellow.500">
-                                    [2025-05-11 09:20:15] WARN: Network
-                                    congestion detected in 'Central Square'
-                                 </Text>
-                              </Box>
-                           </VStack>
-                        </TabPanel>
-                     </TabPanels>
-                  </Tabs>
-               </Box>
-            </Container>
-         </Box>
+                              <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-md font-mono font-sm bg-gray-50 dark:bg-gray-800 overflow-x-auto h-400px overflow-y-scroll">
+                                 <span className="text-green-500">
+                                    [2025-05-11 08:15:23] INFO: System started successfully
+                                 </span>
+                                 <span className="text-blue-500">
+                                    [2025-05-11 08:16:45] INFO: Node 'North District Hub' connected
+                                 </span>
+                                 <span className="text-blue-500">
+                                    [2025-05-11 08:17:12] INFO: Node 'Central Square' connected
+                                 </span>
+                                 <span className="text-yellow-500">
+                                    [2025-05-11 08:18:03] WARN: Node 'East Hospital' battery level low (23%)
+                                 </span>
+                                 <span className="text-blue-500">
+                                    [2025-05-11 08:20:41] INFO: User broadcast sent to all nodes
+                                 </span>
+                                 <span className="text-red-500">
+                                    [2025-05-11 08:32:17] ERROR: Connection to node 'East Hospital' lost
+                                 </span>
+                                 <span className="text-blue-500">
+                                    [2025-05-11 08:45:22] INFO: 24 users connected to 'North District Hub'
+                                 </span>
+                                 <span className="text-blue-500">
+                                    [2025-05-11 09:05:11] INFO: Message template 'Evacuation Alert' used
+                                 </span>
+                                 <span className="text-blue-500">
+                                    [2025-05-11 09:15:33] INFO: Node 'School Zone' connected
+                                 </span>
+                                 <span className="text-yellow-500">
+                                    [2025-05-11 09:20:15] WARN: Network congestion detected in 'Central Square'
+                                 </span>
+                              </div>
+                           </div>
+                        )}
+                     </div>
+                  </div>
+               </main>
+            </div>
+         </div>
 
          {/* Edit Template Modal */}
-         <Modal isOpen={isEditOpen} onClose={onEditClose} size="lg">
-            <ModalOverlay />
-            <ModalContent>
-               <ModalHeader>
-                  {selectedTemplate?.id.includes("new")
-                     ? t("addTemplate")
-                     : t("editTemplate") || "Edit Template"}
-               </ModalHeader>
-               <ModalCloseButton />
-               <ModalBody>
-                  {selectedTemplate && (
-                     <VStack spacing={4} align="stretch">
-                        <FormControl isRequired>
-                           <FormLabel>
-                              {t("templateName") || "Template Name"}
-                           </FormLabel>
-                           <Select
-                              value={selectedTemplate.name}
-                              onChange={(e) =>
-                                 handleTemplateFormChange(
-                                    "name",
-                                    e.target.value
-                                 )
-                              }
-                           >
-                              <option value="evacuationAlert">
-                                 {t("evacuationAlert")}
-                              </option>
-                              <option value="medicalAidAvailable">
-                                 {t("medicalAidAvailable")}
-                              </option>
-                              <option value="powerOutageUpdate">
-                                 {t("powerOutageUpdate")}
-                              </option>
-                              <option value="foodDistribution">
-                                 {t("foodDistribution")}
-                              </option>
-                           </Select>
-                        </FormControl>
+         {isEditOpen && (
+            <div className="fixed inset-0 z-50 overflow-y-auto">
+               <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                  <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+                     <div className="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75"></div>
+                  </div>
 
-                        <FormControl isRequired>
-                           <FormLabel>{t("category")}</FormLabel>
-                           <Select
-                              value={selectedTemplate.category}
-                              onChange={(e) =>
-                                 handleTemplateFormChange(
-                                    "category",
-                                    e.target.value
-                                 )
-                              }
-                           >
-                              {categories.map((category) => (
-                                 <option key={category} value={category}>
-                                    {t(category)}
-                                 </option>
-                              ))}
-                           </Select>
-                        </FormControl>
+                  <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                     <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div className="sm:flex sm:items-start">
+                           <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                              <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+                                 {selectedTemplate?.id.includes("new")
+                                    ? t("addTemplate")
+                                    : t("editTemplate")}
+                              </h3>
+                              <div className="mt-4 space-y-4">
+                                 {selectedTemplate && (
+                                    <>
+                                       <div>
+                                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                             {t("templateName")}
+                                          </label>
+                                          <select
+                                             className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm rounded-md dark:bg-gray-700"
+                                             value={selectedTemplate.name}
+                                             onChange={(e) =>
+                                                handleTemplateFormChange("name", e.target.value)
+                                             }
+                                          >
+                                             <option value="evacuationAlert">
+                                                {t("evacuationAlert")}
+                                             </option>
+                                             <option value="medicalAidAvailable">
+                                                {t("medicalAidAvailable")}
+                                             </option>
+                                             <option value="powerOutageUpdate">
+                                                {t("powerOutageUpdate")}
+                                             </option>
+                                             <option value="foodDistribution">
+                                                {t("foodDistribution")}
+                                             </option>
+                                          </select>
+                                       </div>
 
-                        <FormControl isRequired>
-                           <FormLabel>{t("priority")}</FormLabel>
-                           <Select
-                              value={selectedTemplate.priority}
-                              onChange={(e) =>
-                                 handleTemplateFormChange(
-                                    "priority",
-                                    e.target.value
-                                 )
-                              }
-                           >
-                              <option value="critical">{t("critical")}</option>
-                              <option value="high">{t("high")}</option>
-                              <option value="medium">{t("medium")}</option>
-                              <option value="low">{t("low")}</option>
-                           </Select>
-                        </FormControl>
-                     </VStack>
-                  )}
-               </ModalBody>
-               <ModalFooter>
-                  <Button variant="ghost" mr={3} onClick={onEditClose}>
-                     {t("cancel")}
-                  </Button>
-                  <Button colorScheme="blue" onClick={handleSaveTemplate}>
-                     {t("save") || "Save"}
-                  </Button>
-               </ModalFooter>
-            </ModalContent>
-         </Modal>
+                                       <div>
+                                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                             {t("category")}
+                                          </label>
+                                          <select
+                                             className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm rounded-md dark:bg-gray-700"
+                                             value={selectedTemplate.category}
+                                             onChange={(e) =>
+                                                handleTemplateFormChange("category", e.target.value)
+                                             }
+                                          >
+                                             {categories.map((category) => (
+                                                <option key={category} value={category}>
+                                                   {t(category)}
+                                                </option>
+                                             ))}
+                                          </select>
+                                       </div>
+
+                                       <div>
+                                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                             {t("priority")}
+                                          </label>
+                                          <select
+                                             className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm rounded-md dark:bg-gray-700"
+                                             value={selectedTemplate.priority}
+                                             onChange={(e) =>
+                                                handleTemplateFormChange("priority", e.target.value)
+                                             }
+                                          >
+                                             <option value="critical">{t("critical")}</option>
+                                             <option value="high">{t("high")}</option>
+                                             <option value="medium">{t("medium")}</option>
+                                             <option value="low">{t("low")}</option>
+                                          </select>
+                                       </div>
+                                    </>
+                                 )}
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button
+                           type="button"
+                           className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
+                           onClick={handleSaveTemplate}
+                        >
+                           {t("save")}
+                        </button>
+                        <button
+                           type="button"
+                           className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                           onClick={() => setIsEditOpen(false)}
+                        >
+                           {t("cancel")}
+                        </button>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         )}
 
          {/* Delete Confirmation Modal */}
-         <Modal
-            isOpen={isDeleteOpen}
-            onClose={onDeleteClose}
-            isCentered
-            size="sm"
-         >
-            <ModalOverlay />
-            <ModalContent>
-               <ModalHeader>
-                  {t("confirmDelete") || "Confirm Delete"}
-               </ModalHeader>
-               <ModalCloseButton />
-               <ModalBody>
-                  <Text>
-                     {t("deleteTemplateConfirmation") ||
-                        "Are you sure you want to delete this template?"}
-                     {selectedTemplate && <b> {t(selectedTemplate.name)}</b>}
-                  </Text>
-               </ModalBody>
-               <ModalFooter>
-                  <Button variant="ghost" mr={3} onClick={onDeleteClose}>
-                     {t("cancel")}
-                  </Button>
-                  <Button colorScheme="red" onClick={handleConfirmDelete}>
-                     {t("delete")}
-                  </Button>
-               </ModalFooter>
-            </ModalContent>
-         </Modal>
+         {isDeleteOpen && (
+            <div className="fixed inset-0 z-50 overflow-y-auto">
+               <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                  <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+                     <div className="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75"></div>
+                  </div>
+
+                  <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                     <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div className="sm:flex sm:items-start">
+                           <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                              <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+                                 {t("confirmDelete")}
+                              </h3>
+                              <div className="mt-2">
+                                 <p className="text-sm text-gray-500 dark:text-gray-400">
+                                    {t("deleteTemplateConfirmation")}
+                                    {selectedTemplate && (
+                                       <span className="font-bold"> {t(selectedTemplate.name)}</span>
+                                    )}
+                                 </p>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button
+                           type="button"
+                           className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
+                           onClick={handleConfirmDelete}
+                        >
+                           {t("delete")}
+                        </button>
+                        <button
+                           type="button"
+                           className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                           onClick={() => setIsDeleteOpen(false)}
+                        >
+                           {t("cancel")}
+                        </button>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         )}
 
          {/* View Template Modal */}
-         <Modal isOpen={isViewOpen} onClose={onViewClose} size="lg">
-            <ModalOverlay />
-            <ModalContent>
-               <ModalHeader>{templateContent.name}</ModalHeader>
-               <ModalCloseButton />
-               <ModalBody>
-                  <FormControl mb={4}>
-                     <FormLabel>
-                        {t("messageContent") || "Message Content"}
-                     </FormLabel>
-                     <Textarea
-                        value={editingTemplateContent}
-                        onChange={(e) =>
-                           setEditingTemplateContent(e.target.value)
-                        }
-                        minHeight="150px"
-                        p={4}
-                        bg={useColorModeValue("gray.50", "gray.700")}
-                        borderRadius="md"
-                     />
-                  </FormControl>
+         {isViewOpen && (
+            <div className="fixed inset-0 z-50 overflow-y-auto">
+               <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                  <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+                     <div className="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75"></div>
+                  </div>
 
-                  {/* Display template metadata */}
-                  <SimpleGrid columns={2} spacing={4} mb={4}>
-                     <Box>
-                        <Text fontWeight="bold">{t("category")}:</Text>
-                        <Badge
-                           colorScheme={getPriorityColor(
-                              templateContent.category || "medium"
-                           )}
+                  <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                     <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div className="sm:flex sm:items-start">
+                           <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                              <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+                                 {templateContent.name}
+                              </h3>
+                              <div className="mt-4">
+                                 <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                       {t("messageContent")}
+                                    </label>
+                                    <textarea
+                                       className="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm dark:bg-gray-700"
+                                       rows="6"
+                                       value={editingTemplateContent}
+                                       onChange={(e) => setEditingTemplateContent(e.target.value)}
+                                    />
+                                 </div>
+
+                                 <div className="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                       <span className="font-bold">{t("category")}:</span>
+                                       <span className={`ml-2 px-2 py-1 text-xs font-semibold rounded-full ${
+                                          getPriorityColor(templateContent.category || "medium") === "red"
+                                             ? "bg-red-100 text-red-800"
+                                             : getPriorityColor(templateContent.category || "medium") === "yellow"
+                                             ? "bg-yellow-100 text-yellow-800"
+                                             : "bg-blue-100 text-blue-800"
+                                       }`}>
+                                          {templateContent.category ? t(templateContent.category) : ""}
+                                       </span>
+                                    </div>
+                                    <div>
+                                       <span className="font-bold">{t("priority")}:</span>
+                                       <span className={`ml-2 px-2 py-1 text-xs font-semibold rounded-full ${
+                                          getPriorityColor(templateContent.priority || "medium") === "red"
+                                             ? "bg-red-100 text-red-800"
+                                             : getPriorityColor(templateContent.priority || "medium") === "yellow"
+                                             ? "bg-yellow-100 text-yellow-800"
+                                             : "bg-blue-100 text-blue-800"
+                                       }`}>
+                                          {templateContent.priority ? t(templateContent.priority) : ""}
+                                       </span>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button
+                           type="button"
+                           className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-purple-600 text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:ml-3 sm:w-auto sm:text-sm"
+                           onClick={handleSendTemplate}
                         >
-                           {templateContent.category
-                              ? t(templateContent.category)
-                              : ""}
-                        </Badge>
-                     </Box>
-                     <Box>
-                        <Text fontWeight="bold">{t("priority")}:</Text>
-                        <Badge
-                           colorScheme={getPriorityColor(
-                              templateContent.priority || "medium"
-                           )}
+                           <FiSend className="mr-2" />
+                           {t("send")}
+                        </button>
+                        <button
+                           type="button"
+                           className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                           onClick={handleSaveTemplateContent}
                         >
-                           {templateContent.priority
-                              ? t(templateContent.priority)
-                              : ""}
-                        </Badge>
-                     </Box>
-                  </SimpleGrid>
-               </ModalBody>
-               <ModalFooter>
-                  <Button variant="ghost" mr={2} onClick={onViewClose}>
-                     {t("cancel") || "Cancel"}
-                  </Button>
-                  <Button
-                     colorScheme="blue"
-                     mr={2}
-                     onClick={handleSaveTemplateContent}
-                  >
-                     {t("save") || "Save"}
-                  </Button>
-                  <Button
-                     colorScheme="purple"
-                     leftIcon={<Icon as={FiSend} />}
-                     onClick={handleSendTemplate}
-                  >
-                     {t("send") || "Send"}
-                  </Button>
-               </ModalFooter>
-            </ModalContent>
-         </Modal>
-      </Box>
+                           {t("save")}
+                        </button>
+                        <button
+                           type="button"
+                           className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                           onClick={() => setIsViewOpen(false)}
+                        >
+                           {t("cancel")}
+                        </button>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         )}
+      </div>
    );
 };
 
