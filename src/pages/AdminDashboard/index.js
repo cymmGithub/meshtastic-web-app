@@ -260,9 +260,8 @@ const AdminDashboard = () => {
       try {
          await messages.save(
             "admin",
-            "all",
-            messageTitle,
             targetAudience,
+            messageTitle,
             broadcastMessage
          );
 
